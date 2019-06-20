@@ -10,10 +10,11 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 	//这里无视其他地方的字体设置，使用固定字体
 	static int CaretPos = 0;//第几个字符。
 
-	TCHAR Text[] = TEXT("Microsoft Windows [版本 10.0.18362.175]\r\n(c)2019 Microsoft Corporation。保留所有权利。\r\n\r\nC:\\Users\\11603>");//ezWnd->ezParent->ezParent->Extend->Title;
+	static TCHAR Text[] = TEXT("Microsoft Windows [版本 10.0.18362.175]\r\n(c)2019 Microsoft Corporation。保留所有权利。\r\n\r\nC:\\Users\\11603>");//ezWnd->ezParent->ezParent->Extend->Title;
 
-	TCHAR InputText[] = TEXT("help");//ezWnd->ezParent->ezParent->Extend->Title;
+	static TCHAR InputText[] = TEXT("");//ezWnd->ezParent->ezParent->Extend->Title;
 
+	static int InputLen = 0;
 	switch (message)
 	{
 	case EZWM_CREATE:
@@ -89,7 +90,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 		}
 
 
-		SetTextColor(wParam, RGB(255, 0, 0));
+		SetTextColor(wParam, RGB(255, 255, 255));
 
 
 		LastMove = 0;
@@ -148,11 +149,27 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 		//处理上下左右键（左右切换输入，上下切换历史指令）
 		if (wParam == 37)
 		{
-			CaretPos--;
+			if (CaretPos > 0)
+			{
+				CaretPos--;
+			}
+			else
+			{
+				MessageBeep(0);
+			}
+			
 		}
 		else if (wParam == 39)
 		{
-			CaretPos++;
+			if (CaretPos < InputLen)
+			{
+				CaretPos++;
+			}
+			else
+			{
+				MessageBeep(0);
+			}
+			
 		}
 
 		POINT pt;
@@ -270,23 +287,6 @@ BOOL LocateCaretPos(HDC hdc, HFONT hFont, TCHAR Text[], TCHAR InputText[],int Wi
 			//xCount = 0;
 			//yCount += tm.tmHeight;
 			break;
-		}
-		else if (InputText[iMove] == '\r' && InputText[iMove + 1] == '\n')
-		{
-			//windows换行标记，绘制当前行，重新开始。
-			//TextOut(wParam, xCount, yCount, Text + LastMove, iMove - LastMove);
-			xCount = 0;
-			yCount += tm.tmHeight;
-			LastMove = iMove + 2;
-			iMove++;
-		}
-		else if (InputText[iMove] == '\n')
-		{
-			//Linux换行标记，绘制当前行。
-			//TextOut(wParam, xCount, yCount, InputText + LastMove, iMove - LastMove);
-			xCount = 0;
-			yCount += tm.tmHeight;
-			LastMove = iMove + 1;
 		}
 		else
 		{

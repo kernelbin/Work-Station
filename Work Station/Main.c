@@ -40,7 +40,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	for (int i = 0; i < 8; i++)
 	{
-		ShadowWnd[i] = CreateWindowEx(WS_EX_LAYERED|WS_EX_TOOLWINDOW, TEXT("WorkStation ShadowWindow"), TEXT(""), WS_POPUP | WS_VISIBLE, 0, 0, 0, 0, 0, 0, hInstance, i);
+		ShadowWnd[i] = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOOLWINDOW, TEXT("WorkStation ShadowWindow"), TEXT(""), WS_POPUP | WS_VISIBLE, 0, 0, 0, 0, 0, 0, hInstance, i);
+
 	}
 
 	MainWnd = CreateMainParentWindow(
