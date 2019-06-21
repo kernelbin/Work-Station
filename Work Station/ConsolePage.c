@@ -33,7 +33,10 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 
 	//static TCHAR InputText[] = TEXT("sudo apt-get install minecraft");//ezWnd->ezParent->ezParent->Extend->Title;
 
-	static int InputLen = 20;
+	//static int InputLen = 20;
+
+	POINT pt;
+
 
 
 	switch (message)
@@ -43,8 +46,8 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 
 		Text = InitVText();
 		InputText = InitVText();
-		SetVText(Text, TEXT("Microsoft Windows [版本 10.0.18362.175]\r\n(c)2019 Microsoft Corporation。保留所有权利。\r\n\r\nC:\\Users\\11603>"), -1);
-		SetVText(InputText, TEXT("sudo apt-get install minecraft"), -1);
+		SetVText(Text, TEXT("Workstation C Shell Console [版本 0.0.1]\r\n(c)2019 杨赫。保留所有权利。\r\n\r\nC:\\Users\\11603>\r\n\r\n"), -1);
+		//SetVText(InputText, TEXT("sudo apt-get install minecraft"), -1);
 		return 0;
 
 	case EZWM_SIZE:
@@ -64,7 +67,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 		{
 			return 0;
 		}
-		int iMaxLen = lstrlen(Text->Text);
+		int iMaxLen = Text->Length;
 		int LastMove = 0;
 		int xCount = 0;
 		int yCount = 0;
@@ -77,17 +80,18 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 			if (Text->Text[iMove] == '\0')
 			{
 				//绘制当前行，并退出。
-				SIZE sz;
-				GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
+				//SIZE sz;
+				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
 				TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
 				//yCount += tm.tmHeight;
-				xCount = sz.cx;
+				//xCount = sz.cx;
 				break;
 			}
 			else if (Text->Text[iMove] == '\r' && Text->Text[iMove + 1] == '\n')
 			{
 				//windows换行标记，绘制当前行，重新开始。
 				TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
+				xCount = 0;
 				yCount += tm.tmHeight;
 				LastMove = iMove + 2;
 				iMove++;
@@ -96,21 +100,42 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 			{
 				//Linux换行标记，绘制当前行。
 				TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
+				xCount = 0;
 				yCount += tm.tmHeight;
 				LastMove = iMove + 1;
 			}
 			else
 			{
 				//检查一下会不会长度超出窗口宽度
-				SIZE sz, sz2;
-				GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
-				GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove + 1, &sz2);
-				if (sz.cx <= ezWnd->Width && sz2.cx > ezWnd->Width)
+				//SIZE sz, sz2;
+				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
+				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove + 1, &sz2);
+				//if (sz.cx <= ezWnd->Width && sz2.cx > ezWnd->Width)
+				//{
+				//	//截断
+				//	TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
+				//	yCount += tm.tmHeight;
+				//	LastMove = iMove;// +1;
+				//}
+
+
+				int len;
+				GetCharWidth32(wParam, *(Text->Text + LastMove), *(Text->Text + LastMove), &len);
+				//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+				//yCount += tm.tmHeight;
+				
+
+				if (xCount <= ezWnd->Width && xCount +len > ezWnd->Width)
 				{
 					//截断
-					TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
+					//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
 					yCount += tm.tmHeight;
 					LastMove = iMove;// +1;
+					xCount = len;
+				}
+				else
+				{
+					xCount += len;
 				}
 			}
 		}
@@ -118,70 +143,142 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 
 		SetTextColor(wParam, RGB(255, 255, 255));
 
-
+		if (!InputText->Text)
+		{
+			return 0;
+		}
+		iMaxLen = InputText->Length;
 		LastMove = 0;
+		int xBegin = xCount;
 		for (iMove = 0; iMove <= iMaxLen; iMove++)
 		{
 			if (InputText->Text[iMove] == '\0')
 			{
 				//绘制当前行，并退出。
-				TextOut(wParam, xCount, yCount, InputText->Text + LastMove, iMove - LastMove);
+				TextOut(wParam, xBegin, yCount, InputText->Text + LastMove, iMove - LastMove);
+				xBegin = 0;
 				xCount = 0;
 				yCount += tm.tmHeight;
 				break;
 			}
+			else if (InputText->Text[iMove] == '\r' && InputText->Text[iMove + 1] == '\n')
+			{
+				//windows换行标记，绘制当前行，重新开始。
+				TextOut(wParam, xBegin, yCount, InputText->Text + LastMove, iMove - LastMove);
+				xBegin = 0;
+				xCount = 0;
+				yCount += tm.tmHeight;
+				LastMove = iMove + 2;
+				iMove++;
+			}
+			else if (InputText->Text[iMove] == '\n')
+			{
+				//Linux换行标记，绘制当前行。
+				TextOut(wParam, xBegin, yCount, InputText->Text + LastMove, iMove - LastMove);
+				xBegin = 0;
+				xCount = 0;
+				yCount += tm.tmHeight;
+				LastMove = iMove + 1;
+			}
 			else
 			{
 				//检查一下会不会长度超出窗口宽度
-				SIZE sz, sz2;
-				GetTextExtentPoint32(wParam, InputText->Text + LastMove, iMove - LastMove, &sz);
-				GetTextExtentPoint32(wParam, InputText->Text + LastMove, iMove - LastMove + 1, &sz2);
-				if (sz.cx + xCount <= ezWnd->Width && sz2.cx + xCount > ezWnd->Width)
+				//SIZE sz, sz2;
+				//GetTextExtentPoint32(wParam, InputText->Text + LastMove, iMove - LastMove, &sz);
+				//GetTextExtentPoint32(wParam, InputText->Text + LastMove, iMove - LastMove + 1, &sz2);
+				//if (sz.cx + xCount <= ezWnd->Width && sz2.cx + xCount > ezWnd->Width)
+				//{
+				//	//截断
+				//	TextOut(wParam, xCount, yCount, InputText->Text + LastMove, iMove - LastMove);
+				//	xCount = 0;
+				//	yCount += tm.tmHeight;
+				//	LastMove = iMove;// +1;
+				//}
+
+
+				//检查一下会不会长度超出窗口宽度
+				int len;
+				GetCharWidth32(wParam, *(InputText->Text + iMove), *(InputText->Text + iMove), &len);
+				//GetCharWidth32(wParam, *(InputText->Text + LastMove + 1), *(InputText->Text + LastMove + 1), &lennext);
+				//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+				//yCount += tm.tmHeight;
+				
+
+				if (xCount <= ezWnd->Width && xCount + len > ezWnd->Width)
 				{
 					//截断
-					TextOut(wParam, xCount, yCount, InputText->Text + LastMove, iMove - LastMove);
-					xCount = 0;
+					TextOut(wParam, xBegin, yCount, InputText->Text + LastMove, iMove - LastMove);
+					xBegin = 0;
 					yCount += tm.tmHeight;
 					LastMove = iMove;// +1;
+					xCount = len;
 				}
+				else
+				{
+					xCount += len;
+				}
+
 			}
 		}
 	}
 	return 0;
+
 
 	case EZWM_CHAR:
 		//字符消息
 
 		switch (wParam)
 		{
-		case '\r':
+		case 3:
+			// Ctrl + C
+
 			break;
+
 		case '\n':
+			Sleep(0);
 			break;
+
+		case '\r':
+			//VTextInsertChar(InputText, '\r', CaretPos);
+			VTextInsertChar(InputText, '\n', CaretPos);
+			CaretPos++;
+			break;
+
 		case '\b':
+			if (CaretPos == 0)
+			{
+				MessageBeep(0);
+			}
+			else
+			{
+				VTextDeleteChar(InputText, CaretPos);
+				CaretPos--;
+			}
 			break;
 
 		default:
 			VTextInsertChar(InputText, wParam, CaretPos);
 			CaretPos++;
 
-			EZHideCaret(ezWnd);
-
-			POINT pt;
-			LocateCaretPos(ezWnd->hdc, ConsoleFont, Text->Text, InputText->Text, ezWnd->Width, CaretPos, &pt);
-			EZSetCaretPos(ezWnd, pt.x, pt.y);
-			EZRepaint(ezWnd, 0);
-
-			EZShowCaret(ezWnd);
-
 			break;
 		}
+
+		EZHideCaret(ezWnd);
+
+		
+		LocateCaretPos(ezWnd->hdc, ConsoleFont, Text->Text, InputText->Text, ezWnd->Width, CaretPos, &pt);
+		EZSetCaretPos(ezWnd, pt.x, pt.y);
+		EZRepaint(ezWnd, 0);
+
+		EZShowCaret(ezWnd);
+
 		return 0;
 		
 	case EZWM_KEYDOWN:
 		//处理上下左右键（左右切换输入，上下切换历史指令）
-		if (wParam == 37)
+		switch (wParam)
 		{
+		case VK_LEFT:
 			if (CaretPos > 0)
 			{
 				CaretPos--;
@@ -190,10 +287,8 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 			{
 				MessageBeep(0);
 			}
-
-		}
-		else if (wParam == 39)
-		{
+			break;
+		case VK_RIGHT:
 			if (CaretPos < InputText->Length)
 			{
 				CaretPos++;
@@ -202,10 +297,41 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 			{
 				MessageBeep(0);
 			}
+			break;
+		case VK_DELETE:
+			//处理删除键
+			if (CaretPos == InputText->Length)
+			{
+				MessageBeep(0);
+			}
+			else
+			{
+				VTextDeleteChar(InputText, CaretPos + 1);
 
+				EZHideCaret(ezWnd);
+
+
+				LocateCaretPos(ezWnd->hdc, ConsoleFont, Text->Text, InputText->Text, ezWnd->Width, CaretPos, &pt);
+				EZSetCaretPos(ezWnd, pt.x, pt.y);
+				EZRepaint(ezWnd, 0);
+
+				EZShowCaret(ezWnd);
+
+			}
+			break;
+		/*case VK_RETURN:
+		{
+			USHORT ShiftState = GetKeyState(VK_SHIFT);
+			MessageBeep(0);
 		}
+			*/
+			
+			//判Shift键
+			break;
+		}
+		
 
-		POINT pt;
+		
 		LocateCaretPos(ezWnd->hdc, ConsoleFont, Text->Text, InputText->Text, ezWnd->Width, CaretPos, &pt);
 		EZSetCaretPos(ezWnd, pt.x, pt.y);
 
@@ -232,7 +358,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 
 		return 0;
 	case EZWM_USER_NOTIFY:
-
+		//TODO:正确计算文本高度+窗口高度，并返回
 		return 1200;
 
 	case EZWM_DESTROY:
@@ -259,88 +385,126 @@ BOOL LocateCaretPos(HDC hdc, HFONT hFont, TCHAR Text[], TCHAR InputText[], int W
 	TEXTMETRIC tm;
 	GetTextMetrics(hdc, &tm);
 
-	for (iMove = 0; iMove <= iMaxLen; iMove++)
+	if (Text)
 	{
-		if (Text[iMove] == '\0')
+		for (iMove = 0; iMove <= iMaxLen; iMove++)
 		{
-			//绘制当前行，并退出。
-			SIZE sz;
-			GetTextExtentPoint32(hdc, Text + LastMove, iMove - LastMove, &sz);
-			//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
-			//yCount += tm.tmHeight;
-			xCount = sz.cx;
-			break;
-		}
-		else if (Text[iMove] == '\r' && Text[iMove + 1] == '\n')
-		{
-			//windows换行标记，绘制当前行，重新开始。
-			//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
-			yCount += tm.tmHeight;
-			LastMove = iMove + 2;
-			iMove++;
-		}
-		else if (Text[iMove] == '\n')
-		{
-			//Linux换行标记，绘制当前行。
-			//TextOut(hdc, 0, yCount, Text + LastMove, iMove - LastMove);
-			yCount += tm.tmHeight;
-			LastMove = iMove + 1;
-		}
-		else
-		{
-			//检查一下会不会长度超出窗口宽度
-			//窗口过窄有bug
-			SIZE sz, sz2;
-			GetTextExtentPoint32(hdc, Text + LastMove, iMove - LastMove, &sz);
-			GetTextExtentPoint32(hdc, Text + LastMove, iMove - LastMove + 1, &sz2);
-			if (sz.cx <= Width && sz2.cx > Width)
+			if (Text[iMove] == '\0')
 			{
-				//截断
+				//绘制当前行，并退出。
+				
+				break;
+			}
+			else if (Text[iMove] == '\r' && Text[iMove + 1] == '\n')
+			{
+				//windows换行标记，绘制当前行，重新开始。
 				//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+				xCount = 0;
 				yCount += tm.tmHeight;
-				LastMove = iMove;// +1;
+				LastMove = iMove + 2;
+				iMove++;
+			}
+			else if (Text[iMove] == '\n')
+			{
+				//Linux换行标记，绘制当前行。
+				//TextOut(hdc, 0, yCount, Text + LastMove, iMove - LastMove);
+				xCount = 0;
+				yCount += tm.tmHeight;
+				LastMove = iMove + 1;
+			}
+			else
+			{
+				//检查一下会不会长度超出窗口宽度
+				//窗口过窄有bug
+				//SIZE sz, sz2;
+				//GetTextExtentPoint32(hdc, Text + LastMove, iMove - LastMove, &sz);
+				//GetTextExtentPoint32(hdc, Text + LastMove, iMove - LastMove + 1, &sz2);
+
+				int len;
+				GetCharWidth32(hdc, *(Text + LastMove), *(Text + LastMove), &len);
+				
+				//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+				//yCount += tm.tmHeight;
+				
+
+				if (xCount <= Width && xCount + len > Width)
+				{
+					//截断
+					//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+					yCount += tm.tmHeight;
+					LastMove = iMove;// +1;
+					xCount = 0;
+				}
+				else
+				{
+					xCount += len;
+				}
 			}
 		}
 	}
+	
 
 
 	//往后推CaretPos个字符
 
 
-	LastMove = 0;
-	for (iMove = 0; iMove <= CaretPos; iMove++)
+	if (InputText)
 	{
-		if (InputText[iMove] == '\0' || iMove == CaretPos)
+		LastMove = 0;
+		for (iMove = 0; iMove <= CaretPos; iMove++)
 		{
-			//绘制当前行，并退出。
-			SIZE sz;
-			//TextOut(wParam, xCount, yCount, InputText + LastMove, iMove - LastMove);
-			GetTextExtentPoint32(hdc, InputText + LastMove, iMove - LastMove, &sz);
-			//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
-			//yCount += tm.tmHeight;
-			xCount += sz.cx;
-			//xCount = 0;
-			//yCount += tm.tmHeight;
-			break;
-		}
-		else
-		{
-			//检查一下会不会长度超出窗口宽度
-			SIZE sz, sz2;
-			GetTextExtentPoint32(hdc, InputText + LastMove, iMove - LastMove + 1, &sz);
-			GetTextExtentPoint32(hdc, InputText + LastMove, iMove - LastMove + 2, &sz2);
-			if (sz.cx + xCount <= Width && sz2.cx + xCount > Width)
+			if (InputText[iMove] == '\0' || iMove == CaretPos)
 			{
-				//截断
-				//TextOut(wParam, xCount, yCount, InputText + LastMove, iMove - LastMove);
+				//绘制当前行，并退出。
+				break;
+			}
+			else if (InputText[iMove] == '\r' && InputText[iMove + 1] == '\n')
+			{
+				//windows换行标记，绘制当前行，重新开始。
+				//TextOut(hdc, xCount, yCount, InputText + LastMove, iMove - LastMove);
+				xCount = 0;
+				yCount += tm.tmHeight;
+				LastMove = iMove + 2;
+				iMove++;
+			}
+			else if (InputText[iMove] == '\n')
+			{
+				//Linux换行标记，绘制当前行。
 				xCount = 0;
 				yCount += tm.tmHeight;
 				LastMove = iMove + 1;
 			}
+			else
+			{
+				//检查一下会不会长度超出窗口宽度
+				int len;
+				GetCharWidth32(hdc, *(InputText + iMove), *(InputText + iMove), &len);
+				
+				//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+				//yCount += tm.tmHeight;
+				
+
+				if (xCount <= Width && xCount + len > Width)
+				{
+					//截断
+					//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+					yCount += tm.tmHeight;
+					LastMove = iMove;// +1;
+					xCount = len;
+				}
+				else
+				{
+					xCount += len;
+				}
+			}
 		}
 	}
-
-
+	
+	if (xCount + 8 > Width)
+	{
+		yCount += tm.tmHeight;
+		xCount = 0;
+	}
 	pt->x = xCount;
 	pt->y = yCount + tm.tmHeight - 4;
 	SelectFont(hdc, OldFont);
@@ -442,6 +606,60 @@ BOOL VTextInsertChar(pVTEXT pVText, TCHAR ch, int InsertBefore)
 	pVText->Text[pVText->Length] = 0;
 	pVText->Text[InsertBefore] = ch;
 
+	return TRUE;
+}
+
+
+
+BOOL VTextDeleteChar(pVTEXT pVText, int DeleteBefore)
+{
+	if (!pVText->Text)
+	{
+		return 0;
+	}
+
+	if (DeleteBefore == 0)
+	{
+		return 0;
+	}
+
+	//内容前移
+
+	memmove(pVText->Text + DeleteBefore - 1, pVText->Text + DeleteBefore, pVText->Length - DeleteBefore);
+
+
+	pVText->Length--;
+
+	if (pVText->Length)
+	{
+		for (int bit = 1 << 15; bit > 0; bit >>= 1)
+		{
+			if (bit & pVText->Length)
+			{
+				//找到了。
+				pVText->Capibility = bit << 1;
+				break;
+			}
+		}
+		pVText->Text = realloc(pVText->Text, pVText->Capibility * sizeof(TCHAR));
+		pVText->Text[pVText->Length] = 0;
+	}
+	else
+	{
+		free(pVText->Text);
+		pVText->Text = 0;
+		pVText->Capibility = 0;
+	}
+	
+
+	
+
+	return TRUE;
+}
+
+
+BOOL CommandHandler(pVTEXT Command)
+{
 	return TRUE;
 }
 
