@@ -40,3 +40,11 @@ int AddPage(EZWNDPROC ezWndProc);//添加一个新的页。返回页编号，失败返回 -1
 int RemovePage(int PageID);
 int SelectPage(int PageID);
 int SetPageTransparent(BOOL bTrans);
+
+
+//管道以及标准输入输出流
+
+HANDLE hPipeInR, hPipeInW, hPipeOutR, hPipeOutW;
+
+//指示主程序仍然在运行的
+BOOL bProgramRunning;
