@@ -16,8 +16,10 @@ BOOL LocateCaretPos(HDC hdc, HFONT hFont, pVTEXT Text, pVTEXT InputText, int Wid
 
 pVTEXT InitVText();
 BOOL FreeVText(pVTEXT pVText);
+BOOL ClearVText(pVTEXT pVText);
 BOOL SetVText(pVTEXT pVText, TCHAR Str[], int len);
 
+BOOL CommandHandler(pVTEXT Command);
 
 
 EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
@@ -29,11 +31,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 
 	static pVTEXT Text;
 	static pVTEXT InputText;
-	//static TCHAR Text[] = TEXT("Microsoft Windows [版本 10.0.18362.175]\r\n(c)2019 Microsoft Corporation。保留所有权利。\r\n\r\nC:\\Users\\11603>");//ezWnd->ezParent->ezParent->Extend->Title;
-
-	//static TCHAR InputText[] = TEXT("sudo apt-get install minecraft");//ezWnd->ezParent->ezParent->Extend->Title;
-
-	//static int InputLen = 20;
+	
 
 	POINT pt;
 
@@ -46,7 +44,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 
 		Text = InitVText();
 		InputText = InitVText();
-		SetVText(Text, TEXT("Workstation C Shell Console [版本 0.0.1]\r\n(c)2019 yh。保留所有权利。\r\n\r\nC:\\Users\\11603>\r\n\r\n"), -1);
+		SetVText(Text, TEXT("Workstation C Shell Console [版本 0.0.1]\n(c)2019 yh。保留所有权利。\n\nC:\\Users\\11603>\n\n"), -1);
 		//SetVText(InputText, TEXT("sudo apt-get install minecraft"), -1);
 		return 0;
 
@@ -273,7 +271,15 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 			break;
 
 		case '\n':
-			Sleep(0);
+			CommandHandler(InputText);
+			//将文本并入
+			CatVText(Text, InputText);
+
+			VTextInsertChar(Text, '\n', Text->Length);
+
+			ClearVText(InputText);
+			CaretPos = 0;
+
 			break;
 
 		case '\r':
@@ -627,6 +633,19 @@ BOOL FreeVText(pVTEXT pVText)
 		free(pVText->Text);
 	}
 	free(pVText);
+	return TRUE;
+}
+
+BOOL ClearVText(pVTEXT pVText)
+{
+	if (pVText->Capibility)
+	{
+		free(pVText->Text);
+		pVText->Text = 0;
+		pVText->Length = 0;
+		pVText->Capibility = 0;
+	}
+	return TRUE;
 }
 
 BOOL SetVText(pVTEXT pVText, TCHAR Str[], int len)//len=-1时自动获取长度
@@ -674,6 +693,52 @@ BOOL SetVText(pVTEXT pVText, TCHAR Str[], int len)//len=-1时自动获取长度
 
 	return TRUE;
 }
+
+BOOL CatVText(pVTEXT pVTextA, pVTEXT pVTextB)
+{
+	//把B接在A后面
+
+	int OrgALen = pVTextA->Length;
+	pVTextA->Length += pVTextB->Length;
+
+
+	pVTextA->Capibility = 0;
+	for (int bit = 1 << 15; bit > 0; bit >>= 1)
+	{
+		if (bit & pVTextA->Length)
+		{
+			//找到了。
+			pVTextA->Capibility = bit << 1;
+			break;
+		}
+	}
+
+	if (pVTextA->Capibility == 0)
+	{
+		//看来A和B长度都是0，啥都不用做
+		return TRUE;
+	}
+	else
+	{
+		if (pVTextA->Text)
+		{
+			pVTextA->Text = realloc(pVTextA->Text, pVTextA->Capibility * sizeof(TCHAR));
+		}
+		else
+		{
+			pVTextA->Text = malloc(pVTextA->Capibility * sizeof(TCHAR));
+		}
+
+		if (pVTextB->Text)
+		{
+			lstrcpy(pVTextA->Text + OrgALen, pVTextB->Text);
+			pVTextA->Text[pVTextA->Length] = 0;
+		}
+	}
+
+	return TRUE;
+}
+
 
 
 BOOL VTextInsertChar(pVTEXT pVText, TCHAR ch, int InsertBefore)
@@ -761,6 +826,7 @@ BOOL VTextDeleteChar(pVTEXT pVText, int DeleteBefore)
 
 BOOL CommandHandler(pVTEXT Command)
 {
+	MessageBox(0, Command->Text, TEXT("command"), 0);
 	return TRUE;
 }
 
