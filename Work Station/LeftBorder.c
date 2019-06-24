@@ -20,7 +20,7 @@ typedef struct __tagFixedBtn
 } FIXED_BTN,*pFIXED_BTN;
 
 
-FIXED_BTN FixedBtn[] = { {0,TEXT(""),DrawMenuBtn,0,0,-1},{0,TEXT("主页"),DrawHomeBtn,1,MainPageProc,-1},{0,TEXT("控制台"),DrawConsoleBtn,1,ConsolePageProc,-1} };
+FIXED_BTN FixedBtn[] = { {0,TEXT(""),DrawMenuBtn,0,0,-1},{0,TEXT("主页"),DrawHomeBtn,1,MainPageProc,-1},{0,TEXT("C Shell 控制台"),DrawConsoleBtn,1,ConsolePageProc,-1} };
 
 #define FIXED_BTN_NUM (sizeof(FixedBtn) / sizeof(FixedBtn[0]))
 
@@ -168,7 +168,7 @@ EZWNDPROC FixedBtnProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 
 		HFONT OldFont = SelectObject(wParam, CreateAppFont(ezWnd->Height * (1.0/2.0), 400));
 		SetBkMode(wParam, TRANSPARENT);
-		TextOut(wParam, LBORDER_NARROW * (3 - 1.618), ezWnd->Height / 4.0, FixedBtn[ezWnd->ezID].BtnText, lstrlen(FixedBtn[ezWnd->ezID].BtnText));
+		TextOut(wParam, LBORDER_NARROW * (1 + (1 - 0.618)/2), ezWnd->Height / 4.0, FixedBtn[ezWnd->ezID].BtnText, lstrlen(FixedBtn[ezWnd->ezID].BtnText));
 		DeleteFont(SelectObject(wParam, OldFont));
 	}
 	return 0;

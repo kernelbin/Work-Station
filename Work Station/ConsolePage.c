@@ -122,6 +122,8 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 				//}
 
 
+
+				//检查一下会不会长度超出窗口宽度
 				int len;
 				if (*(Text->Text + iMove) == '\t')
 				{
@@ -133,17 +135,20 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 					//顶到16的倍数
 					len = 32 - xCount % 32;
 
+					xBegin += len;
+
 				}
 				else
 				{
-
 					GetCharWidth32(wParam, *(Text->Text + iMove), *(Text->Text + iMove), &len);
 				}
+
+				//GetCharWidth32(wParam, *(InputText->Text + LastMove + 1), *(InputText->Text + LastMove + 1), &lennext);
 				//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
 				//yCount += tm.tmHeight;
-				
 
-				if (xCount <= ezWnd->Width && xCount +len > ezWnd->Width)
+
+				if (xCount <= ezWnd->Width && xCount + len > ezWnd->Width)
 				{
 					//截断
 					TextOut(wParam, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
@@ -156,6 +161,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 				{
 					xCount += len;
 				}
+
 			}
 		}
 
@@ -474,19 +480,22 @@ BOOL LocateCaretPos(HDC hdc, HFONT hFont, pVTEXT Text, pVTEXT InputText, int Wid
 			if (*(Text->Text + iMove) == '\t')
 			{
 				//制表符，特殊处理。先把前面的解决掉
-				//TextOut(wParam, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
+				TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
 				xBegin = xCount;
 				LastMove = iMove + 1;
 
 				//顶到16的倍数
 				len = 32 - xCount % 32;
 
+				xBegin += len;
+
 			}
 			else
 			{
-
 				GetCharWidth32(hdc, *(Text->Text + iMove), *(Text->Text + iMove), &len);
 			}
+
+			//GetCharWidth32(wParam, *(InputText->Text + LastMove + 1), *(InputText->Text + LastMove + 1), &lennext);
 			//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
 			//yCount += tm.tmHeight;
 
@@ -494,7 +503,7 @@ BOOL LocateCaretPos(HDC hdc, HFONT hFont, pVTEXT Text, pVTEXT InputText, int Wid
 			if (xCount <= Width && xCount + len > Width)
 			{
 				//截断
-				//TextOut(wParam, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
+				TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
 				xBegin = 0;
 				yCount += tm.tmHeight;
 				LastMove = iMove;// +1;

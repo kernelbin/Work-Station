@@ -6,7 +6,7 @@
 EZWND CreateMainParentWindow(int x, int y, int Width, int Height, int iCmdShow, EZWNDPROC ezWndProc)
 {
 	EZWND ezParent, ezWnd;
-	DWORD WinStyle = WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_DLGFRAME | WS_POPUP | WS_THICKFRAME;
+	DWORD WinStyle = WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_POPUP | WS_THICKFRAME;
 	ezParent = CreateEZParentWindowEx(EZS_PARENT | EZS_OVERLAPPEDWINDOW, x, y, Width, Height,
 		WinStyle, MainParentProc, 0, 0);
 	ezParent->Extend->hExtend[0] = ezWnd = CreateEZWindow(ezParent, 0, APPBAR_HEIGHT, Width, Height - APPBAR_HEIGHT, ezWndProc);
