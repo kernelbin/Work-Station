@@ -30,6 +30,9 @@
     <ClInclude Include="GaussianBlur.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="VText.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.c">
@@ -60,6 +63,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ConsolePage.c">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="VText.c">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

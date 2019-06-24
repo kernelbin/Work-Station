@@ -22,6 +22,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	else
 	{
 		bProgramRunning = TRUE;
+		InitConsoleBuffer();
 		HANDLE hStdoutRecvThread = StartStdoutReceiver(lpCmdLine);
 		if (!hStdoutRecvThread)
 		{
@@ -235,3 +236,13 @@ int ErrorMsgBox(TCHAR Error[])
 	return MessageBox(NULL, ShowText, szAppName, MB_ICONERROR);
 }
 
+
+
+BOOL InitConsoleBuffer()
+{
+	ConsoleText = InitVText();
+	ConsoleInput = InitVText();
+
+	SetVText(ConsoleText, TEXT("Workstation C Shell Console [版本 0.0.1]\n(c)2019 yh。保留所有权利。\n\nC:\\Users\\11603>\n\n"), -1);
+	return TRUE;
+}

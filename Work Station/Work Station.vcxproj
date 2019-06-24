@@ -149,6 +149,7 @@
     <ClInclude Include="GaussianBlur.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="LayoutDefine.h" />
+    <ClInclude Include="VText.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ConsolePage.c" />
@@ -161,6 +162,7 @@
     <ClCompile Include="MainWnd.c" />
     <ClCompile Include="PageHolder.c" />
     <ClCompile Include="ShadowWnd.c" />
+    <ClCompile Include="VText.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

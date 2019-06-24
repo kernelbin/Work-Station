@@ -1,6 +1,7 @@
 #pragma once
 #include"EZWndProc.h"
 #include"LayoutDefine.h"
+#include"VText.h"
 
 //应用程序名称定义
 
@@ -48,3 +49,8 @@ HANDLE hPipeInR, hPipeInW, hPipeOutR, hPipeOutW;
 
 //指示主程序仍然在运行的
 BOOL bProgramRunning;
+
+
+//控制台
+
+pVTEXT ConsoleText, ConsoleInput;
