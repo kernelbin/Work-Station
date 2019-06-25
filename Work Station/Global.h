@@ -8,8 +8,8 @@
 #define szAppName TEXT("YH's Work Station")
 
 //窗口句柄
-EZWND MainWnd = 0, LBorder = 0, PageHolder = 0, ScrollBar = 0;
-HWND ShadowWnd[8] = { 0 };
+EZWND MainWnd, LBorder, PageHolder, ScrollBar;
+HWND ShadowWnd[8];
 
 
 //消息钩子
