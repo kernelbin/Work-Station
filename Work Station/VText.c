@@ -5,6 +5,7 @@
 pVTEXT InitVText()
 {
 	pVTEXT pVText = malloc(sizeof(VTEXT));
+	if (!pVText) return 0;
 	memset(pVText, 0, sizeof(VTEXT));
 	return pVText;
 }

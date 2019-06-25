@@ -14,3 +14,4 @@ pVTEXT InitVText();
 BOOL FreeVText(pVTEXT pVText);
 BOOL ClearVText(pVTEXT pVText);
 BOOL SetVText(pVTEXT pVText, TCHAR Str[], int len);
+BOOL CatVText(pVTEXT pVTextA, pVTEXT pVTextB);

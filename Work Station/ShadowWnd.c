@@ -393,6 +393,23 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	for (int i = 0; i < 8; i++)
 		DestroyWindow(ShadowWnd[i]);
 	break;
+
+
+	case WM_STDIO_REDIRECT:
+	{
+		WCHAR* test = wParam;
+		MessageBoxW(NULL, wParam, L"qwq", 0);
+		
+		pVTEXT buf = InitVText();
+		SetVText(buf, wParam, lParam);
+		free(wParam);
+		CatVText(ConsoleText, buf);
+		FreeVText(buf);
+
+		//EZRepaint(MainWnd, 0);
+		break;
+	}
+		
 	}
 	return CallWindowProc(OldMainWndProc, hwnd, message, wParam, lParam);
 }

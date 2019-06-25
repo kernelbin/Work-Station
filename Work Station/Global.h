@@ -46,6 +46,8 @@ int SetPageTransparent(BOOL bTrans);
 //管道以及标准输入输出流
 
 HANDLE hPipeInR, hPipeInW, hPipeOutR, hPipeOutW;
+HANDLE hStdoutRecvThread;
+
 
 //指示主程序仍然在运行的
 BOOL bProgramRunning;
@@ -54,3 +56,9 @@ BOOL bProgramRunning;
 //控制台
 
 pVTEXT ConsoleText, ConsoleInput;
+
+
+//自定义Windows消息
+#define WM_STDIO_REDIRECT (WM_USER + 1)
+
+

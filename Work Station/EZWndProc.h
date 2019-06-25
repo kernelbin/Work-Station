@@ -17,8 +17,8 @@ EZWNDPROC MainPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
 
 EZWNDPROC NewScrollBarProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
 
-EZWNDPROC MainPageContentScrollProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
-EZWNDPROC MainPageContentProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
+//EZWNDPROC MainPageContentScrollProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
+//EZWNDPROC MainPageContentProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
 
 EZWNDPROC PluginListProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
 

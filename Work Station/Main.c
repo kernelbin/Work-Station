@@ -18,17 +18,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	if (lstrlen(lpCmdLine) == 0)
 	{
 		MainProcessBooter();
+		return 0;
 	}
 	else
 	{
 		bProgramRunning = TRUE;
-		InitConsoleBuffer();
-		HANDLE hStdoutRecvThread = StartStdoutReceiver(lpCmdLine);
-		if (!hStdoutRecvThread)
+		if (!InitConsoleBuffer())
 		{
+			ErrorMsgBox(TEXT("初始化命令行缓冲区失败"));
 			return 0;
 		}
-		int iRet = MainEntry(hInstance, iCmdShow);
+		
+		int iRet = MainEntry(hInstance,lpCmdLine, iCmdShow);
 		bProgramRunning = FALSE;
 		CancelIoEx(hPipeOutR, 0);
 		WaitForSingleObject(hStdoutRecvThread, INFINITE);
@@ -65,11 +66,11 @@ int MainProcessBooter()//处理妥善Pipe的问题，然后启动新进程
 		si.hStdOutput = hPipeOutW;
 		si.hStdError = hPipeOutW;
 
-		if (! GetModuleFileName(0, FileName, MAX_PATH)) __leave;
+		if (!GetModuleFileName(0, FileName, MAX_PATH)) __leave;
 
 		TCHAR CommandLine[128];
 
-		_stprintf_s(CommandLine,_countof(CommandLine), TEXT(" %p %p %p %p"), hPipeInR, hPipeInW, hPipeOutR, hPipeOutW);
+		_stprintf_s(CommandLine, _countof(CommandLine), TEXT(" %p %p %p %p"), hPipeInR, hPipeInW, hPipeOutR, hPipeOutW);
 
 		if (!CreateProcess(FileName, CommandLine, NULL, NULL, TRUE, NULL, NULL, NULL, &si, &pi)) __leave;
 
@@ -85,7 +86,7 @@ int MainProcessBooter()//处理妥善Pipe的问题，然后启动新进程
 		{
 			ErrorMsgBox(TEXT("标准输入输出重定向出错"));
 		}
-		
+
 		//执行清理
 		if (hPipeInR)
 		{
@@ -112,17 +113,17 @@ int MainProcessBooter()//处理妥善Pipe的问题，然后启动新进程
 		{
 			CloseHandle(pi.hThread);
 		}
-		
+
 
 	}
-	
 
-	
-	
+
+
+
 	return 0;
 }
 
-int MainEntry(HINSTANCE hInstance, int iCmdShow)
+int MainEntry(HINSTANCE hInstance,LPSTR lpCmdLine, int iCmdShow)
 {
 	//主程序入口
 	WNDCLASS wndclass;
@@ -169,8 +170,16 @@ int MainEntry(HINSTANCE hInstance, int iCmdShow)
 	OldMainWndProc = SetWindowLongPtr(MainWnd->hParent, GWLP_WNDPROC, MainWndHookProc);
 	MainWndHookProc(MainWnd->hParent, WM_CREATE, 0, 0);
 
-	
-	
+
+	hStdoutRecvThread = StartStdoutReceiver(lpCmdLine);
+	if (!hStdoutRecvThread)
+	{
+		ErrorMsgBox(TEXT("初始化标准输入输出重定向接收线程失败"));
+		return 0;
+	}
+
+
+
 	return EZWndMessageLoop();
 }
 
@@ -192,9 +201,9 @@ HANDLE StartStdoutReceiver(LPSTR lpCmdLine)
 		setvbuf(stdout, 0, _IONBF, 0);
 
 		StdoutRecvThread = _beginthreadex(0, 0, StdoutReceiver, 0, 0, 0);
-		
 
-		printf("pwpppwpppw");
+
+		printf("qwqqwqwqwqwq QWQWQWQ中文");
 		bSuccess = TRUE;
 	}
 	__finally
@@ -211,16 +220,44 @@ void* WINAPI StdoutReceiver()
 	DWORD BufferSize;
 	GetNamedPipeInfo(hPipeOutR, NULL, &BufferSize, NULL, NULL);
 	char* Buffer;
-	
+
 	Buffer = malloc(BufferSize + 1);
 
-	//开始接受
-	while (bProgramRunning)
+	if (!Buffer)
 	{
-		DWORD BytesRead;
-		ReadFile(hPipeOutR, Buffer, BufferSize, &BytesRead, 0);
-		Buffer[BytesRead] = 0;
+		ErrorMsgBox(TEXT("申请内存失败"));
+		ExitProcess(0);//这不是主线程，所以暴力退出
+		//TODO: 貌似这样用户可以把这个对话框晾在这里并且继续点击主界面？
+		return 0;
 	}
+	else
+	{
+		//开始接受
+		while (bProgramRunning)
+		{
+			DWORD BytesRead;
+			BOOL bRet = ReadFile(hPipeOutR, Buffer, BufferSize, &BytesRead, 0);
+			if ((!bRet) && (bProgramRunning))
+			{
+				ErrorMsgBox(TEXT("IO重定向 ReadFile 函数返回失败"));
+				ExitProcess(0);//这不是主线程，所以暴力退出
+				//TODO: 貌似这样用户可以把这个对话框晾在这里并且继续点击主界面？
+				return 0;
+			}
+			Buffer[BytesRead] = 0;
+			//转换成宽字符，然后丢消息
+
+			int cchLen = MultiByteToWideChar(CP_ACP, 0, Buffer, BytesRead, 0, 0);
+
+			WCHAR * wcBuf = malloc((cchLen + 1) * sizeof(WCHAR));
+
+			MultiByteToWideChar(CP_ACP, 0, Buffer, BytesRead, wcBuf, (cchLen + 1));
+			wcBuf[cchLen] = 0;
+			//发消息
+			PostMessage(MainWnd->hParent, WM_STDIO_REDIRECT, wcBuf, cchLen);
+		}
+	}
+
 
 	free(Buffer);
 
@@ -240,9 +277,11 @@ int ErrorMsgBox(TCHAR Error[])
 
 BOOL InitConsoleBuffer()
 {
-	ConsoleText = InitVText();
-	ConsoleInput = InitVText();
+	if (!(ConsoleText = InitVText()))return FALSE;
+	if (!(ConsoleInput = InitVText()))return FALSE;
 
-	SetVText(ConsoleText, TEXT("Workstation C Shell Console [版本 0.0.1]\n(c)2019 yh。保留所有权利。\n\nC:\\Users\\11603>\n\n"), -1);
+	SetVText(ConsoleText, TEXT("Work Station C Shell Console [版本 0.0.1]\n(c)2019 yh。保留所有权利。\n\nC:\\Users\\11603>\n\n"), -1);
 	return TRUE;
 }
+
+
