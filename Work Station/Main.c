@@ -17,7 +17,7 @@ void* WINAPI ConsoleThread();
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow)
 {
-	if (lstrlen(lpCmdLine) == 0)
+	if (strlen(lpCmdLine) == 0)
 	{
 		MainProcessBooter();
 		return 0;
@@ -359,9 +359,11 @@ BOOL InitConsoleBuffer()
 void* WINAPI ConsoleThread()
 {
 	int a;
-	scanf_s("%d", &a);
-	printf("%d",a);
-	
+	while (1)
+	{
+		printf("qwq");
+		Sleep(10);
+	}
 	return 0;
 }
 
