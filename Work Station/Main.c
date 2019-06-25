@@ -300,12 +300,26 @@ BOOL InitConsoleBuffer()
 }
 
 
+
 void* WINAPI ConsoleThread()
 {
-	char str[100] = { 0 };
-	printf("Work Station C Shell [版本 0.0.1]\n(c)2019 杨赫。保留所有权利。\n\nC:\\Users\\11603>\n");
-	scanf_s("%s", str, 100);
-	printf(str);
+	int a;
+	printf("please input a number:");
+	scanf_s("%d", &a);
+	printf(checkprime(a) ? "%d is a prime" : "%d is not a prime", a);
 	return 0;
 }
 
+int checkprime(int a)
+{
+	int isprime = 1;
+	for (int i = 2; i < a; i++)
+	{
+		if (a % i == 0)
+		{
+			isprime = 0;
+			break;
+		}
+	}
+	return isprime;
+}

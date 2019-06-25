@@ -43,11 +43,6 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 		SetTextColor(wParam, RGB(204, 204, 204));
 
 
-
-		if (!ConsoleText->Text)
-		{
-			return 0;
-		}
 		int iMaxLen = ConsoleText->Length;
 		int LastMove = 0;
 		int xCount = 0;
@@ -55,101 +50,107 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 		int iMove;
 		int xBegin = 0;
 
-
-
 		TEXTMETRIC tm;
 		GetTextMetrics(wParam, &tm);
-		for (iMove = 0; iMove <= iMaxLen; iMove++)
+
+
+		if (ConsoleText->Text)
 		{
-			if (ConsoleText->Text[iMove] == '\0')
+			for (iMove = 0; iMove <= iMaxLen; iMove++)
 			{
-				//绘制当前行，并退出。
-				//SIZE sz;
-				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
-				TextOut(wParam, xBegin, yCount, ConsoleText->Text + LastMove, iMove - LastMove);
-				//yCount += tm.tmHeight;
-				//xCount = sz.cx;
-				break;
-			}
-			else if (ConsoleText->Text[iMove] == '\r' && ConsoleText->Text[iMove + 1] == '\n')
-			{
-				//windows换行标记，绘制当前行，重新开始。
-				TextOut(wParam, xBegin, yCount, ConsoleText->Text + LastMove, iMove - LastMove);
-				xBegin = 0;
-				xCount = 0;
-				yCount += tm.tmHeight;
-				LastMove = iMove + 2;
-				iMove++;
-			}
-			else if (ConsoleText->Text[iMove] == '\n')
-			{
-				//Linux换行标记，绘制当前行。
-				TextOut(wParam, xBegin, yCount, ConsoleText->Text + LastMove, iMove - LastMove);
-				xBegin = 0;
-				xCount = 0;
-				yCount += tm.tmHeight;
-				LastMove = iMove + 1;
-			}
-			else
-			{
-				//检查一下会不会长度超出窗口宽度
-				//SIZE sz, sz2;
-				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
-				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove + 1, &sz2);
-				//if (sz.cx <= ezWnd->Width && sz2.cx > ezWnd->Width)
-				//{
-				//	//截断
-				//	TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
-				//	yCount += tm.tmHeight;
-				//	LastMove = iMove;// +1;
-				//}
-
-
-
-				//检查一下会不会长度超出窗口宽度
-				int len;
-				if (*(ConsoleText->Text + iMove) == '\t')
+				if (ConsoleText->Text[iMove] == '\0')
 				{
-					//制表符，特殊处理。先把前面的解决掉
+					//绘制当前行，并退出。
+					//SIZE sz;
+					//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
 					TextOut(wParam, xBegin, yCount, ConsoleText->Text + LastMove, iMove - LastMove);
-					xBegin = xCount;
-					LastMove = iMove + 1;
-
-					//顶到16的倍数
-					len = 32 - xCount % 32;
-
-					xBegin += len;
-
+					//yCount += tm.tmHeight;
+					//xCount = sz.cx;
+					break;
 				}
-				else
+				else if (ConsoleText->Text[iMove] == '\r' && ConsoleText->Text[iMove + 1] == '\n')
 				{
-					GetCharWidth32(wParam, *(ConsoleText->Text + iMove), *(ConsoleText->Text + iMove), &len);
-				}
-
-				//GetCharWidth32(wParam, *(InputText->Text + LastMove + 1), *(InputText->Text + LastMove + 1), &lennext);
-				//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
-				//yCount += tm.tmHeight;
-
-
-				if (xCount <= ezWnd->Width && xCount + len > ezWnd->Width)
-				{
-					//截断
+					//windows换行标记，绘制当前行，重新开始。
 					TextOut(wParam, xBegin, yCount, ConsoleText->Text + LastMove, iMove - LastMove);
 					xBegin = 0;
+					xCount = 0;
 					yCount += tm.tmHeight;
-					LastMove = iMove;// +1;
-					xCount = len;
+					LastMove = iMove + 2;
+					iMove++;
+				}
+				else if (ConsoleText->Text[iMove] == '\n')
+				{
+					//Linux换行标记，绘制当前行。
+					TextOut(wParam, xBegin, yCount, ConsoleText->Text + LastMove, iMove - LastMove);
+					xBegin = 0;
+					xCount = 0;
+					yCount += tm.tmHeight;
+					LastMove = iMove + 1;
 				}
 				else
 				{
-					xCount += len;
-				}
+					//检查一下会不会长度超出窗口宽度
+					//SIZE sz, sz2;
+					//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
+					//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove + 1, &sz2);
+					//if (sz.cx <= ezWnd->Width && sz2.cx > ezWnd->Width)
+					//{
+					//	//截断
+					//	TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
+					//	yCount += tm.tmHeight;
+					//	LastMove = iMove;// +1;
+					//}
 
+
+
+					//检查一下会不会长度超出窗口宽度
+					int len;
+					if (*(ConsoleText->Text + iMove) == '\t')
+					{
+						//制表符，特殊处理。先把前面的解决掉
+						TextOut(wParam, xBegin, yCount, ConsoleText->Text + LastMove, iMove - LastMove);
+						xBegin = xCount;
+						LastMove = iMove + 1;
+
+						//顶到16的倍数
+						len = 32 - xCount % 32;
+
+						xBegin += len;
+
+					}
+					else
+					{
+						GetCharWidth32(wParam, *(ConsoleText->Text + iMove), *(ConsoleText->Text + iMove), &len);
+					}
+
+					//GetCharWidth32(wParam, *(InputText->Text + LastMove + 1), *(InputText->Text + LastMove + 1), &lennext);
+					//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+					//yCount += tm.tmHeight;
+
+
+					if (xCount <= ezWnd->Width && xCount + len > ezWnd->Width)
+					{
+						//截断
+						TextOut(wParam, xBegin, yCount, ConsoleText->Text + LastMove, iMove - LastMove);
+						xBegin = 0;
+						yCount += tm.tmHeight;
+						LastMove = iMove;// +1;
+						xCount = len;
+					}
+					else
+					{
+						xCount += len;
+					}
+
+				}
 			}
 		}
+		
+		
+		
 
 
-		SetTextColor(wParam, RGB(255, 255, 255));
+		SetTextColor(wParam, RGB(1,147,233));
 
 		if (!ConsoleInput->Text)
 		{
@@ -400,108 +401,112 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 BOOL LocateCaretPos(HDC hdc, HFONT hFont, pVTEXT Text, pVTEXT InputText, int Width, int CaretPos, PPOINT pt)
 {
 	//计算出位置并返回
+	
+	
 	HFONT OldFont = SelectObject(hdc, hFont);
-
-	if (!Text->Text)
-	{
-		return 0;
-	}
 	int iMaxLen = Text->Length;
 	int LastMove = 0;
 	int xCount = 0;
 	int yCount = 0;
 	int iMove;
 	int xBegin = 0;
-
-
-
 	TEXTMETRIC tm;
 	GetTextMetrics(hdc, &tm);
-	for (iMove = 0; iMove <= iMaxLen; iMove++)
+
+	if (Text->Text)
 	{
-		if (Text->Text[iMove] == '\0')
+		for (iMove = 0; iMove <= iMaxLen; iMove++)
 		{
-			//绘制当前行，并退出。
-			//SIZE sz;
-			//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
-			//TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
-			//yCount += tm.tmHeight;
-			//xCount = sz.cx;
-			break;
-		}
-		else if (Text->Text[iMove] == '\r' && Text->Text[iMove + 1] == '\n')
-		{
-			//windows换行标记，绘制当前行，重新开始。
-			//TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
-			xBegin = 0;
-			xCount = 0;
-			yCount += tm.tmHeight;
-			LastMove = iMove + 2;
-			iMove++;
-		}
-		else if (Text->Text[iMove] == '\n')
-		{
-			//Linux换行标记，绘制当前行。
-			//TextOut(wParam, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
-			xBegin = 0;
-			xCount = 0;
-			yCount += tm.tmHeight;
-			LastMove = iMove + 1;
-		}
-		else
-		{
-			//检查一下会不会长度超出窗口宽度
-			//SIZE sz, sz2;
-			//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
-			//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove + 1, &sz2);
-			//if (sz.cx <= ezWnd->Width && sz2.cx > ezWnd->Width)
-			//{
-			//	//截断
-			//	TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
-			//	yCount += tm.tmHeight;
-			//	LastMove = iMove;// +1;
-			//}
-
-
-			int len;
-			if (*(Text->Text + iMove) == '\t')
+			if (Text->Text[iMove] == '\0')
 			{
-				//制表符，特殊处理。先把前面的解决掉
-				TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
-				xBegin = xCount;
-				LastMove = iMove + 1;
-
-				//顶到16的倍数
-				len = 32 - xCount % 32;
-
-				xBegin += len;
-
+				//绘制当前行，并退出。
+				//SIZE sz;
+				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
+				//TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
+				//yCount += tm.tmHeight;
+				//xCount = sz.cx;
+				break;
 			}
-			else
+			else if (Text->Text[iMove] == '\r' && Text->Text[iMove + 1] == '\n')
 			{
-				GetCharWidth32(hdc, *(Text->Text + iMove), *(Text->Text + iMove), &len);
-			}
-
-			//GetCharWidth32(wParam, *(InputText->Text + LastMove + 1), *(InputText->Text + LastMove + 1), &lennext);
-			//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
-			//yCount += tm.tmHeight;
-
-
-			if (xCount <= Width && xCount + len > Width)
-			{
-				//截断
-				TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
+				//windows换行标记，绘制当前行，重新开始。
+				//TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
 				xBegin = 0;
+				xCount = 0;
 				yCount += tm.tmHeight;
-				LastMove = iMove;// +1;
-				xCount = len;
+				LastMove = iMove + 2;
+				iMove++;
+			}
+			else if (Text->Text[iMove] == '\n')
+			{
+				//Linux换行标记，绘制当前行。
+				//TextOut(wParam, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
+				xBegin = 0;
+				xCount = 0;
+				yCount += tm.tmHeight;
+				LastMove = iMove + 1;
 			}
 			else
 			{
-				xCount += len;
+				//检查一下会不会长度超出窗口宽度
+				//SIZE sz, sz2;
+				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove, &sz);
+				//GetTextExtentPoint32(wParam, Text->Text + LastMove, iMove - LastMove + 1, &sz2);
+				//if (sz.cx <= ezWnd->Width && sz2.cx > ezWnd->Width)
+				//{
+				//	//截断
+				//	TextOut(wParam, 0, yCount, Text->Text + LastMove, iMove - LastMove);
+				//	yCount += tm.tmHeight;
+				//	LastMove = iMove;// +1;
+				//}
+
+
+				int len;
+				if (*(Text->Text + iMove) == '\t')
+				{
+					//制表符，特殊处理。先把前面的解决掉
+					TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
+					xBegin = xCount;
+					LastMove = iMove + 1;
+
+					//顶到16的倍数
+					len = 32 - xCount % 32;
+
+					xBegin += len;
+
+				}
+				else
+				{
+					GetCharWidth32(hdc, *(Text->Text + iMove), *(Text->Text + iMove), &len);
+				}
+
+				//GetCharWidth32(wParam, *(InputText->Text + LastMove + 1), *(InputText->Text + LastMove + 1), &lennext);
+				//TextOut(wParam, 0, yCount, Text + LastMove, iMove - LastMove);
+				//yCount += tm.tmHeight;
+
+
+				if (xCount <= Width && xCount + len > Width)
+				{
+					//截断
+					TextOut(hdc, xBegin, yCount, Text->Text + LastMove, iMove - LastMove);
+					xBegin = 0;
+					yCount += tm.tmHeight;
+					LastMove = iMove;// +1;
+					xCount = len;
+				}
+				else
+				{
+					xCount += len;
+				}
 			}
 		}
 	}
+	
+
+
+
+	
+	
 
 
 	if (!InputText->Text)
@@ -713,7 +718,7 @@ BOOL CommandHandler(pVTEXT Command)
 	//TODO: 核验bWritten，看看是不是有没写进去的
 
 	free(buf);
-	MessageBox(0, Command->Text, TEXT("command"), 0);
+	//MessageBox(0, Command->Text, TEXT("command"), 0);
 	return TRUE;
 }
 

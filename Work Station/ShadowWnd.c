@@ -404,7 +404,7 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		CatVText(ConsoleText, buf);
 		FreeVText(buf);
 
-		//EZRepaint(MainWnd, 0);
+		if(MainWnd)EZRepaint(MainWnd, 0);
 		break;
 	}
 		
