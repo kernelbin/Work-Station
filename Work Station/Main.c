@@ -256,6 +256,31 @@ void* WINAPI StdoutReceiver()
 			
 
 			//这里！！正式读取文件之前，（其实已经peek出来了）手工检查unicode
+			for (int i = 0; i < TotalAvail;)
+			{
+				if ((Buffer[i] & 0b10000000) == 0)//单个ASCII
+				{
+					i++;
+					continue;
+				}
+				else if((Buffer[i] & 0b10000000) && (Buffer[i+1] & 0b10000000) && (i+1< TotalAvail))
+				{
+					i += 2;
+					continue;
+				}
+				else if ((Buffer[i] & 0b10000000) && (i + 1 == TotalAvail))
+				{
+					TotalAvail--;//最后一个貌似是超的
+					break;
+				}
+				else
+				{
+					ErrorMsgBox(TEXT("解析ANSI字符串出错"));
+					ExitProcess(0);//这不是主线程，所以暴力退出
+				}
+			}
+
+
 			BOOL bRet = ReadFile(hPipeOutR, Buffer, TotalAvail, &BytesRead, 0);
 			
 			if ((!bRet) && (bProgramRunning))
