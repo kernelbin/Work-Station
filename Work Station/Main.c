@@ -242,13 +242,22 @@ void* WINAPI StdoutReceiver()
 			DWORD BytesRead;
 			DWORD TotalAvail;
 			PeekNamedPipe(hPipeOutR, Buffer, BufferSize, &BytesRead, &TotalAvail, 0);
+			if (TotalAvail == 0)
+			{
+				ReadFile(hPipeOutR, Buffer, 0, &BytesRead, 0);
+				PeekNamedPipe(hPipeOutR, Buffer, BufferSize, &BytesRead, &TotalAvail, 0);
+			}
 			if (TotalAvail > BufferSize)
 			{
 				//wtf?
 				ErrorMsgBox(TEXT("管道中剩余数据过多"));
 				ExitProcess(0);//这不是主线程，所以暴力退出
 			}
+			
+
+			//这里！！正式读取文件之前，（其实已经peek出来了）手工检查unicode
 			BOOL bRet = ReadFile(hPipeOutR, Buffer, TotalAvail, &BytesRead, 0);
+			
 			if ((!bRet) && (bProgramRunning))
 			{
 				ErrorMsgBox(TEXT("IO重定向 ReadFile 函数返回失败"));
@@ -279,9 +288,6 @@ void* WINAPI StdoutReceiver()
 
 }
 
-typedef unsigned(__stdcall* _beginthreadex_proc_type)(void*);
-
-
 int ErrorMsgBox(TCHAR Error[])
 {
 	TCHAR ShowText[256];
@@ -304,9 +310,12 @@ BOOL InitConsoleBuffer()
 void* WINAPI ConsoleThread()
 {
 	int a;
-	printf("please input a number:");
-	scanf_s("%d", &a);
-	printf(checkprime(a) ? "%d is a prime" : "%d is not a prime", a);
+	while (1)
+	{
+		printf("疯狂输出中文输出中文输出中文输出中文输出中文and english");
+		Sleep(10);
+	}
+	
 	return 0;
 }
 

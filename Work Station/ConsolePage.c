@@ -388,7 +388,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 		return 0;
 	case EZWM_USER_NOTIFY:
 		//TODO:正确计算文本高度+窗口高度，并返回
-		return 1200;
+		return 10000;
 
 	case EZWM_DESTROY:
 		DeleteObject(ConsoleFont);
@@ -622,89 +622,89 @@ BOOL LocateCaretPos(HDC hdc, HFONT hFont, pVTEXT Text, pVTEXT InputText, int Wid
 
 
 
-
-BOOL VTextInsertChar(pVTEXT pVText, TCHAR ch, int InsertBefore)
-{
-	pVText->Length++;
-
-
-	for (int bit = 1 << 15; bit > 0; bit >>= 1)
-	{
-		if (bit & pVText->Length)
-		{
-			//找到了。
-			pVText->Capibility = bit << 1;
-			break;
-		}
-	}
-
-
-	if (pVText->Text)
-	{
-		pVText->Text = realloc(pVText->Text, pVText->Capibility * sizeof(TCHAR));
-	}
-	else
-	{
-		pVText->Text = malloc(pVText->Capibility * sizeof(TCHAR));
-	}
-
-	//内容后移
-
-	memmove(pVText->Text + InsertBefore + 1, pVText->Text + InsertBefore, (pVText->Length - 1 - InsertBefore) * sizeof(TCHAR));
-	pVText->Text[pVText->Length] = 0;
-	pVText->Text[InsertBefore] = ch;
-
-	return TRUE;
-}
-
-
-
-BOOL VTextDeleteChar(pVTEXT pVText, int DeleteBefore)
-{
-	if (!pVText->Text)
-	{
-		return 0;
-	}
-
-	if (DeleteBefore == 0)
-	{
-		return 0;
-	}
-
-	//内容前移
-
-	memmove(pVText->Text + DeleteBefore - 1, pVText->Text + DeleteBefore, (pVText->Length - DeleteBefore) * sizeof(TCHAR));
-
-
-	pVText->Length--;
-
-	if (pVText->Length)
-	{
-		for (int bit = 1 << 15; bit > 0; bit >>= 1)
-		{
-			if (bit & pVText->Length)
-			{
-				//找到了。
-				pVText->Capibility = bit << 1;
-				break;
-			}
-		}
-		pVText->Text = realloc(pVText->Text, pVText->Capibility * sizeof(TCHAR));
-		pVText->Text[pVText->Length] = 0;
-	}
-	else
-	{
-		free(pVText->Text);
-		pVText->Text = 0;
-		pVText->Capibility = 0;
-	}
-	
-
-	
-
-	return TRUE;
-}
-
+//
+//BOOL VTextInsertChar(pVTEXT pVText, TCHAR ch, int InsertBefore)
+//{
+//	pVText->Length++;
+//
+//
+//	for (int bit = 1 << 15; bit > 0; bit >>= 1)
+//	{
+//		if (bit & pVText->Length)
+//		{
+//			//找到了。
+//			pVText->Capibility = bit << 1;
+//			break;
+//		}
+//	}
+//
+//
+//	if (pVText->Text)
+//	{
+//		pVText->Text = realloc(pVText->Text, pVText->Capibility * sizeof(TCHAR));
+//	}
+//	else
+//	{
+//		pVText->Text = malloc(pVText->Capibility * sizeof(TCHAR));
+//	}
+//
+//	//内容后移
+//
+//	memmove(pVText->Text + InsertBefore + 1, pVText->Text + InsertBefore, (pVText->Length - 1 - InsertBefore) * sizeof(TCHAR));
+//	pVText->Text[pVText->Length] = 0;
+//	pVText->Text[InsertBefore] = ch;
+//
+//	return TRUE;
+//}
+//
+//
+//
+//BOOL VTextDeleteChar(pVTEXT pVText, int DeleteBefore)
+//{
+//	if (!pVText->Text)
+//	{
+//		return 0;
+//	}
+//
+//	if (DeleteBefore == 0)
+//	{
+//		return 0;
+//	}
+//
+//	//内容前移
+//
+//	memmove(pVText->Text + DeleteBefore - 1, pVText->Text + DeleteBefore, (pVText->Length - DeleteBefore) * sizeof(TCHAR));
+//
+//
+//	pVText->Length--;
+//
+//	if (pVText->Length)
+//	{
+//		for (int bit = 1 << 15; bit > 0; bit >>= 1)
+//		{
+//			if (bit & pVText->Length)
+//			{
+//				//找到了。
+//				pVText->Capibility = bit << 1;
+//				break;
+//			}
+//		}
+//		pVText->Text = realloc(pVText->Text, pVText->Capibility * sizeof(TCHAR));
+//		pVText->Text[pVText->Length] = 0;
+//	}
+//	else
+//	{
+//		free(pVText->Text);
+//		pVText->Text = 0;
+//		pVText->Capibility = 0;
+//	}
+//	
+//
+//	
+//
+//	return TRUE;
+//}
+//
 
 BOOL CommandHandler(pVTEXT Command)
 {
