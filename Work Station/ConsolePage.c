@@ -260,11 +260,15 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 			break;
 
 		case '\n':
-			CommandHandler(ConsoleInput);
+
+			VTextInsertChar(ConsoleInput, '\n', ConsoleInput->Length);
+
+			
 			//将文本并入
 			CatVText(ConsoleText, ConsoleInput);
 
-			VTextInsertChar(ConsoleText, '\n', ConsoleText->Length);
+			CommandHandler(ConsoleInput);
+			//VTextInsertChar(ConsoleText, '\n', ConsoleText->Length);
 
 			ClearVText(ConsoleInput);
 			CaretPos = 0;
@@ -699,6 +703,16 @@ BOOL VTextDeleteChar(pVTEXT pVText, int DeleteBefore)
 
 BOOL CommandHandler(pVTEXT Command)
 {
+	//转换为ASCII
+	int cbLen = WideCharToMultiByte(CP_ACP, 0, Command->Text, Command->Length, 0, 0, 0, 0);
+	char* buf = malloc((cbLen + 1) * sizeof(char));
+	WideCharToMultiByte(CP_ACP, 0, Command->Text, Command->Length, buf, cbLen, 0, 0);
+	buf[cbLen] = 0;
+	DWORD bWritten = 0;
+	WriteFile(hPipeInW, buf, cbLen, &bWritten, 0);
+	//TODO: 核验bWritten，看看是不是有没写进去的
+
+	free(buf);
 	MessageBox(0, Command->Text, TEXT("command"), 0);
 	return TRUE;
 }

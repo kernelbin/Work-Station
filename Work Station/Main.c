@@ -12,6 +12,8 @@ HANDLE StartStdoutReceiver(LPSTR lpCmdLine);
 
 void* WINAPI StdoutReceiver();
 
+void* WINAPI ConsoleThread();
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int iCmdShow)
 {
@@ -178,7 +180,8 @@ int MainEntry(HINSTANCE hInstance,LPSTR lpCmdLine, int iCmdShow)
 		return 0;
 	}
 
-
+	//创建一个线程来处理控制台
+	_beginthreadex(0, 0, ConsoleThread, 0, 0, 0);
 
 	return EZWndMessageLoop();
 }
@@ -203,7 +206,7 @@ HANDLE StartStdoutReceiver(LPSTR lpCmdLine)
 		StdoutRecvThread = _beginthreadex(0, 0, StdoutReceiver, 0, 0, 0);
 
 
-		printf("qwqqwqwqwqwq QWQWQWQ中文");
+		//printf("qwqqwqwqwqwq QWQWQWQ中文");
 		bSuccess = TRUE;
 	}
 	__finally
@@ -216,7 +219,8 @@ HANDLE StartStdoutReceiver(LPSTR lpCmdLine)
 
 void* WINAPI StdoutReceiver()
 {
-	MessageBox(NULL, TEXT(""), TEXT(""), 0);
+
+	//MessageBox(NULL, TEXT(""), TEXT(""), 0);
 	DWORD BufferSize;
 	GetNamedPipeInfo(hPipeOutR, NULL, &BufferSize, NULL, NULL);
 	char* Buffer;
@@ -236,7 +240,15 @@ void* WINAPI StdoutReceiver()
 		while (bProgramRunning)
 		{
 			DWORD BytesRead;
-			BOOL bRet = ReadFile(hPipeOutR, Buffer, BufferSize, &BytesRead, 0);
+			DWORD TotalAvail;
+			PeekNamedPipe(hPipeOutR, Buffer, BufferSize, &BytesRead, &TotalAvail, 0);
+			if (TotalAvail > BufferSize)
+			{
+				//wtf?
+				ErrorMsgBox(TEXT("管道中剩余数据过多"));
+				ExitProcess(0);//这不是主线程，所以暴力退出
+			}
+			BOOL bRet = ReadFile(hPipeOutR, Buffer, TotalAvail, &BytesRead, 0);
 			if ((!bRet) && (bProgramRunning))
 			{
 				ErrorMsgBox(TEXT("IO重定向 ReadFile 函数返回失败"));
@@ -244,17 +256,21 @@ void* WINAPI StdoutReceiver()
 				//TODO: 貌似这样用户可以把这个对话框晾在这里并且继续点击主界面？
 				return 0;
 			}
-			Buffer[BytesRead] = 0;
+			Buffer[TotalAvail] = 0;
 			//转换成宽字符，然后丢消息
 
-			int cchLen = MultiByteToWideChar(CP_ACP, 0, Buffer, BytesRead, 0, 0);
+			int cchLen = MultiByteToWideChar(CP_ACP, 0, Buffer, TotalAvail, 0, 0);
 
 			WCHAR * wcBuf = malloc((cchLen + 1) * sizeof(WCHAR));
 
-			MultiByteToWideChar(CP_ACP, 0, Buffer, BytesRead, wcBuf, (cchLen + 1));
+			MultiByteToWideChar(CP_ACP, 0, Buffer, TotalAvail, wcBuf, (cchLen + 1));
 			wcBuf[cchLen] = 0;
 			//发消息
-			PostMessage(MainWnd->hParent, WM_STDIO_REDIRECT, wcBuf, cchLen);
+			SendMessage(MainWnd->hParent, WM_STDIO_REDIRECT, wcBuf, cchLen);
+
+			/*TCHAR OutShow[100];
+			wsprintf(OutShow, TEXT("%d"), TotalAvail);
+			MessageBox(NULL, OutShow, TEXT("qwq123456789"), 0);*/
 		}
 	}
 
@@ -280,8 +296,16 @@ BOOL InitConsoleBuffer()
 	if (!(ConsoleText = InitVText()))return FALSE;
 	if (!(ConsoleInput = InitVText()))return FALSE;
 
-	SetVText(ConsoleText, TEXT("Work Station C Shell Console [版本 0.0.1]\n(c)2019 yh。保留所有权利。\n\nC:\\Users\\11603>\n\n"), -1);
 	return TRUE;
 }
 
+
+void* WINAPI ConsoleThread()
+{
+	char str[100] = { 0 };
+	printf("Work Station C Shell [版本 0.0.1]\n(c)2019 杨赫。保留所有权利。\n\nC:\\Users\\11603>\n");
+	scanf_s("%s", str, 100);
+	printf(str);
+	return 0;
+}
 

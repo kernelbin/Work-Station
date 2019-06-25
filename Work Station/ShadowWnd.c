@@ -397,10 +397,8 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 	case WM_STDIO_REDIRECT:
 	{
-		WCHAR* test = wParam;
-		MessageBoxW(NULL, wParam, L"qwq", 0);
-		
 		pVTEXT buf = InitVText();
+		MessageBoxW(0, wParam, L"qwq", 0);
 		SetVText(buf, wParam, lParam);
 		free(wParam);
 		CatVText(ConsoleText, buf);
