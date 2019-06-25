@@ -222,6 +222,9 @@ void* WINAPI StdoutReceiver()
 
 	//MessageBox(NULL, TEXT(""), TEXT(""), 0);
 	DWORD BufferSize;
+
+	BOOL bRet;
+
 	GetNamedPipeInfo(hPipeOutR, NULL, &BufferSize, NULL, NULL);
 	char* Buffer;
 
@@ -244,7 +247,23 @@ void* WINAPI StdoutReceiver()
 			PeekNamedPipe(hPipeOutR, Buffer, BufferSize, &BytesRead, &TotalAvail, 0);
 			if (TotalAvail == 0)
 			{
-				ReadFile(hPipeOutR, Buffer, 0, &BytesRead, 0);
+				bRet = ReadFile(hPipeOutR, Buffer, 0, &BytesRead, 0);
+				if (!bRet)
+				{
+					DWORD Err = GetLastError();
+					if (Err == ERROR_OPERATION_ABORTED && bProgramRunning == 0)
+					{
+						break;
+					}
+					else
+					{
+						ErrorMsgBox(TEXT("IO重定向 ReadFile 函数返回失败"));
+						ExitProcess(0);//这不是主线程，所以暴力退出
+						return 0;
+					}
+				}
+
+
 				PeekNamedPipe(hPipeOutR, Buffer, BufferSize, &BytesRead, &TotalAvail, 0);
 			}
 			if (TotalAvail > BufferSize)
@@ -280,15 +299,20 @@ void* WINAPI StdoutReceiver()
 				}
 			}
 
-
-			BOOL bRet = ReadFile(hPipeOutR, Buffer, TotalAvail, &BytesRead, 0);
-			
-			if ((!bRet) && (bProgramRunning))
+			bRet = ReadFile(hPipeOutR, Buffer, TotalAvail, &BytesRead, 0);
+			if (!bRet)
 			{
-				ErrorMsgBox(TEXT("IO重定向 ReadFile 函数返回失败"));
-				ExitProcess(0);//这不是主线程，所以暴力退出
-				//TODO: 貌似这样用户可以把这个对话框晾在这里并且继续点击主界面？
-				return 0;
+				DWORD Err = GetLastError();
+				if (Err == ERROR_OPERATION_ABORTED && bProgramRunning == 0)
+				{
+					break;
+				}
+				else
+				{
+					ErrorMsgBox(TEXT("IO重定向 ReadFile 函数返回失败"));
+					ExitProcess(0);//这不是主线程，所以暴力退出
+					return 0;
+				}
 			}
 			Buffer[TotalAvail] = 0;
 			//转换成宽字符，然后丢消息
@@ -335,11 +359,8 @@ BOOL InitConsoleBuffer()
 void* WINAPI ConsoleThread()
 {
 	int a;
-	while (1)
-	{
-		printf("疯狂输出中文输出中文输出中文输出中文输出中文and english");
-		Sleep(10);
-	}
+	scanf_s("%d", &a);
+	printf("%d",a);
 	
 	return 0;
 }
