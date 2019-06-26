@@ -25,6 +25,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	else
 	{
 		//加载设置
+		MessageBox(NULL, TEXT(""), TEXT(""), 0);
 		switch (TryLoadSettings())
 		{
 		case SETTINGS_LOADED:
@@ -33,7 +34,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			if (MessageBox(NULL, TEXT("未找到设置文件。是否重置设置？"), szAppName, MB_YESNO | MB_ICONQUESTION) == IDYES)
 			{
 				LoadDefSettings();
-				SaveSettings();
+				SaveSettings(TRUE);
 			}
 			else
 			{

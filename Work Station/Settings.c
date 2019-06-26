@@ -31,10 +31,12 @@ int TryLoadSettings()
 		CloseHandle(hFile);
 		return SETTINGS_ERROR;
 	}
-	Buffer = malloc(FileSize);
+	Buffer = malloc(FileSize + 2);
 
 	DWORD BytesRead;
-	ReadFile(hFile, &Buffer, FileSize, &BytesRead, 0);
+	ReadFile(hFile, Buffer, FileSize, &BytesRead, 0);
+	Buffer[FileSize] = 0;
+	Buffer[FileSize + 1] = 0;
 	if (BytesRead != FileSize)
 	{
 		free(Buffer);
@@ -58,7 +60,7 @@ int SaveSettings(BOOL bCreate)
 {
 	//±£¥Ê…Ë÷√
 	HANDLE hFile = CreateFile(TEXT("WorkStation.settings"),
-		GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, bCreate ? CREATE_ALWAYS: OPEN_EXISTING, 0, 0);
+		GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, 0, bCreate ? CREATE_ALWAYS : OPEN_EXISTING, 0, 0);
 
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
@@ -76,9 +78,12 @@ int SaveSettings(BOOL bCreate)
 
 
 	cJSON* Settings = cJSON_CreateObject();
+	char* SettingsStr = cJSON_Print(Settings);
 
 	DWORD Written;
-	WriteFile(hFile, "qwq", 4, &Written, 0);
+	WriteFile(hFile, SettingsStr, strlen(SettingsStr), &Written, 0);
+
+	free(SettingsStr);
 	CloseHandle(hFile);
 	return TRUE;
 }

@@ -4,7 +4,7 @@
 //有关设置的头文件
 
 int TryLoadSettings();
-int SaveSettings();
+int SaveSettings(BOOL bCreate);
 
 //TryLoadSettings的返回值定义
 #define SETTINGS_LOADED 0			//找到设置并加载成功

@@ -24,11 +24,7 @@
 /* JSON parser in C. */
 #define _CRT_SECURE_NO_WARNINGS
 #include <string.h>
-
-
 #include <stdio.h>
-
-
 #include <math.h>
 #include <stdlib.h>
 #include <float.h>
