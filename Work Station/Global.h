@@ -2,6 +2,7 @@
 #include"EZWndProc.h"
 #include"LayoutDefine.h"
 #include"VText.h"
+#include"Settings.h"
 
 //应用程序名称定义
 
@@ -34,31 +35,34 @@ TCHAR FontFaceName[32];
 int InitGDIObject();
 HFONT CreateAppFont(int Height, int Weight);
 
+//动画刷新频率
 #define ANIMATION_TIMESPACE 32
 
-
+//页管理
 int AddPage(EZWNDPROC ezWndProc);//添加一个新的页。返回页编号，失败返回 -1
 int RemovePage(int PageID);
 int SelectPage(int PageID);
 int SetPageTransparent(BOOL bTrans);
 
 
-//管道以及标准输入输出流
 
+
+//管道以及标准输入输出流
 HANDLE hPipeInR, hPipeInW, hPipeOutR, hPipeOutW;
 HANDLE hStdoutRecvThread;
 
 
-//指示主程序仍然在运行的
+//指示主程序仍然在运行的变量
 BOOL bProgramRunning;
 
 
-//控制台
-
+//控制台文本缓冲区
 pVTEXT ConsoleText, ConsoleInput;
 
 
 //自定义Windows消息
 #define WM_STDIO_REDIRECT (WM_USER + 1)
+
+
 
 

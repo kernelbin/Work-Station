@@ -24,6 +24,33 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	}
 	else
 	{
+		//加载设置
+		switch (TryLoadSettings())
+		{
+		case SETTINGS_LOADED:
+			break;
+		case SETTINGS_NOTFOUND:
+			if (MessageBox(NULL, TEXT("未找到设置文件。是否重置设置？"), szAppName, MB_YESNO | MB_ICONQUESTION) == IDYES)
+			{
+				LoadDefSettings();
+				SaveSettings();
+			}
+			else
+			{
+				return 0;
+			}
+			break;
+		case SETTINGS_ACCESS_DENIED:
+			ErrorMsgBox(TEXT("没有权限访问设置文件"));
+			return 0;
+		case SETTINGS_ERROR:
+			ErrorMsgBox(TEXT("加载设置时出现错误"));
+			return 0;
+		default:
+			ErrorMsgBox(TEXT("加载设置时出现未知错误"));
+			return 0;
+		}
+
 		bProgramRunning = TRUE;
 		if (!InitConsoleBuffer())
 		{

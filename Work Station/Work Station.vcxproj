@@ -144,14 +144,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="cJSON.h" />
     <ClInclude Include="EasyWindow.h" />
     <ClInclude Include="EZWndProc.h" />
     <ClInclude Include="GaussianBlur.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="LayoutDefine.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="VText.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="cJSON.c" />
     <ClCompile Include="ConsolePage.c" />
     <ClCompile Include="EasyWindow.c" />
     <ClCompile Include="GaussianBlur.c" />
@@ -161,6 +164,7 @@
     <ClCompile Include="MainPage.c" />
     <ClCompile Include="MainWnd.c" />
     <ClCompile Include="PageHolder.c" />
+    <ClCompile Include="Settings.c" />
     <ClCompile Include="ShadowWnd.c" />
     <ClCompile Include="VText.c" />
   </ItemGroup>
