@@ -23,3 +23,5 @@ EZWNDPROC NewScrollBarProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 EZWNDPROC PluginListProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
 
 EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
+
+EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);

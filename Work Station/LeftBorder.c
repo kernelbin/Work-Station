@@ -1,11 +1,13 @@
 #include<Windows.h>
 #include"EasyWindow.h"
 #include"Global.h"
-
+#include<math.h>
 
 BOOL DrawMenuBtn(HDC hdc, int x, int y, int Width, int Height, int bStretch, COLORREF Color);
 BOOL DrawHomeBtn(HDC hdc, int x, int y, int Width, int Height, int bStretch, COLORREF Color);
 BOOL DrawConsoleBtn(HDC hdc, int x, int y, int Width, int Height, int bStretch, COLORREF Color);
+BOOL DrawSettingBtn(HDC hdc, int x, int y, int Width, int Height, int bStretch, COLORREF Color);
+
 
 #define MAX_BUTTON_TEXT 32
 
@@ -20,7 +22,12 @@ typedef struct __tagFixedBtn
 } FIXED_BTN,*pFIXED_BTN;
 
 
-FIXED_BTN FixedBtn[] = { {0,TEXT(""),DrawMenuBtn,0,0,-1},{0,TEXT("主页"),DrawHomeBtn,1,MainPageProc,-1},{0,TEXT("C Shell 控制台"),DrawConsoleBtn,1,ConsolePageProc,-1} };
+FIXED_BTN FixedBtn[] = {
+{0,TEXT(""),DrawMenuBtn,0,0,-1},
+{0,TEXT("主页"),DrawHomeBtn,1,MainPageProc,-1},
+{0,TEXT("C Shell"),DrawConsoleBtn,1,ConsolePageProc,-1},
+{0,TEXT("设置"),DrawSettingBtn,1,SettingsPageProc,-1}
+};
 
 #define FIXED_BTN_NUM (sizeof(FixedBtn) / sizeof(FixedBtn[0]))
 
@@ -341,5 +348,69 @@ BOOL DrawConsoleBtn(HDC hdc, int x, int y, int Width, int Height, int bStretch, 
 	}
 
 	return 0;
+}
+
+
+
+
+BOOL DrawSettingBtn(HDC hdc, int x, int y, int Width, int Height, int bStretch, COLORREF Color)
+{
+
+	HDC hdcRender;
+	if (bStretch)
+	{
+		hdcRender = GetMemDC(hdc, Width * STRETCH, Height * STRETCH);
+		StretchBlt(hdcRender, 0, 0, Width * STRETCH, Height * STRETCH, hdc, x, y, Width, Height, SRCCOPY);
+	}
+	else
+	{
+		hdcRender = hdc;
+	}
+
+	HPEN OldPen = SelectObject(hdcRender, CreatePen(PS_SOLID, bStretch ? STRETCH : 1, Color));
+
+	int IconWidth = Width * (bStretch ? STRETCH : 1);
+	int IconHeight = Height * (bStretch ? STRETCH : 1);
+	int IconX = (bStretch ? 0 : x);
+	int IconY = (bStretch ? 0 : y);
+
+	//绘制一个 “>_”
+
+	//MoveToEx(hdcRender, IconX + IconWidth / 4.0, IconY + IconHeight * 3 / 8.0, 0);
+	//LineTo(hdcRender, IconX + IconWidth / 2.0, IconY + IconHeight / 2.0);
+	//LineTo(hdcRender, IconX + IconWidth / 4.0, IconY + IconHeight * 5 / 8.0);
+
+	//MoveToEx(hdcRender, IconX + IconWidth / 2.0, IconY + IconHeight * 11 / 16.0, 0);
+	//LineTo(hdcRender, IconX + IconWidth * 3 / 4.0, IconY + IconHeight * 11 / 16.0);
+
+
+	float nWidth;
+	float nHeight;
+	nWidth = Width * (bStretch ? STRETCH : 1) / 16.0;
+	nHeight = Height * (bStretch ? STRETCH : 1) / 16.0;
+
+	MoveToEx(hdcRender, IconX + nWidth * 6, IconY + nHeight * 2 * (4 - sqrt(3.0)), 0);
+	LineTo(hdcRender, IconX + nWidth * 10, IconY + nHeight * 2 * (4 - sqrt(3.0)));
+	LineTo(hdcRender, IconX + nWidth * 12, IconY + nHeight * 8);
+	LineTo(hdcRender, IconX + nWidth * 10, IconY + nHeight * 2 * (sqrt(3.0) + 4));
+	LineTo(hdcRender, IconX + nWidth * 6, IconY + nHeight * 2 * (sqrt(3.0) + 4));
+	LineTo(hdcRender, IconX + nWidth * 4, IconY + nHeight * 8);
+	LineTo(hdcRender, IconX + nWidth * 6, IconY + nHeight * 2 * (4 - sqrt(3.0)));
+
+	SelectObject(hdcRender, GetStockObject(NULL_BRUSH));
+	Ellipse(hdcRender, IconX + nWidth * 7, IconY + nHeight * 7, IconX + nWidth * 9, IconY + nHeight * 9);
+
+	DeleteObject(SelectObject(hdcRender, OldPen));
+	if (bStretch)
+	{
+		SetStretchBltMode(hdc, HALFTONE);
+		StretchBlt(hdc, x, y, Width, Height, hdcRender, 0, 0, Width * STRETCH, Height * STRETCH, SRCCOPY);
+		DeleteMemDC(hdcRender);
+	}
+
+	return 0;
+
+
+	
 }
 
