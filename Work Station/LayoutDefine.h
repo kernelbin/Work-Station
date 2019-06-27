@@ -7,7 +7,7 @@
 
 //界面定义
 
-#define MIN_UI_WIDTH 350
+#define MIN_UI_WIDTH 390
 #define MIN_UI_HEIGHT 440
 
 
