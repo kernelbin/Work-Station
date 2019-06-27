@@ -22,4 +22,17 @@
 
 #define UI_BREAKPOINT 500
 
+
+//设置页面的UI布局
+
 #define PAGE_PADDING 30 //页内内容和页的边距
+
+#define CONTROL_GAP 24 //控件之间的间距
+
+//文件路径控件组
+  
+#define PATHCONTROL_MAXLEN 400
+#define PATHCONTROL_MINLEN 200
+
+#define PATHCONTROL_BTN_LEN 60
+

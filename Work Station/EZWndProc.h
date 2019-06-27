@@ -25,3 +25,5 @@ EZWNDPROC PluginListProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
 
 EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
+
+EZWNDPROC ColorBlockProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam);
