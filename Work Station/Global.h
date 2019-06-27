@@ -30,6 +30,8 @@ COLORREF AppColor;
 
 //界面字体定义
 TCHAR FontFaceName[32];
+LOGFONT FontForm;
+
 
 //GDI对象管理相关API
 int InitGDIObject();

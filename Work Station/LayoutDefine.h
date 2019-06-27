@@ -6,6 +6,11 @@
 #define SHADOW_HITTEST 7
 
 //界面定义
+
+#define MIN_UI_WIDTH 350
+#define MIN_UI_HEIGHT 440
+
+
 #define APPBAR_HEIGHT 40
 
 #define DEF_WIDTH 950
@@ -16,3 +21,5 @@
 
 
 #define UI_BREAKPOINT 500
+
+#define PAGE_PADDING 30 //页内内容和页的边距

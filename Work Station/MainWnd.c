@@ -167,8 +167,8 @@ EZWNDPROC MainParentProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 		pMMInfo->ptMaxSize.x = rect.right - rect.left;// +(xborder << 2);
 		pMMInfo->ptMaxSize.y = rect.bottom - rect.top;// +(yborder << 2);
 
-		pMMInfo->ptMinTrackSize.x = 290;
-		pMMInfo->ptMinTrackSize.y = 440;
+		pMMInfo->ptMinTrackSize.x = MIN_UI_WIDTH;
+		pMMInfo->ptMinTrackSize.y = MIN_UI_HEIGHT;
 		return 1;
 	}
 
@@ -398,6 +398,7 @@ EZWNDPROC NewScrollBarProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 		//显然是个假消息...
 		hdcBlack = GetMemDC(ezWnd->hdc, 1, 1);
 		Transparent = 0;
+		ezWnd->Transparent = 160;
 		return 0;
 
 	case EZWM_SIZE:
@@ -415,6 +416,9 @@ EZWNDPROC NewScrollBarProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 
 	}
 	break;
+	case EZWM_TRANSDRAW:
+		PatBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, WHITENESS);
+		break;
 	case EZWM_USER_NOTIFY:
 		switch (wParam)
 		{
