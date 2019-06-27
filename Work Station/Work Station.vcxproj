@@ -164,6 +164,7 @@
     <ClCompile Include="MainPage.c" />
     <ClCompile Include="MainWnd.c" />
     <ClCompile Include="PageHolder.c" />
+    <ClCompile Include="Pic.cpp" />
     <ClCompile Include="Settings.c" />
     <ClCompile Include="SettingsPage.c" />
     <ClCompile Include="ShadowWnd.c" />

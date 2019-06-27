@@ -3,6 +3,7 @@
 #include"Global.h"
 #include<math.h>
 
+
 EZWND CreateMainParentWindow(int x, int y, int Width, int Height, int iCmdShow, EZWNDPROC ezWndProc)
 {
 	EZWND ezParent, ezWnd;
@@ -208,13 +209,17 @@ EZWNDPROC MainParentProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 }
 
 
-
-
 EZWNDPROC MainWndProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 {
 	static BOOL IsBorderOpened = 0;//这是目标状态
 	static int BorderWidth = LBORDER_NARROW;//这是当前状态
 	static int TimerID = -1;//计时器
+
+	static HBITMAP BkgndPic = 0;
+	static HDC BkgndDC = 0;
+	static BITMAP BkgndBmp;
+
+	static HDC BkBlurPic = 0;
 
 	switch (message)
 	{
@@ -229,8 +234,22 @@ EZWNDPROC MainWndProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 		ScrollBar->ezWndProc = NewScrollBarProc;
 		//发一条假消息初始化
 		NewScrollBarProc(ScrollBar, EZWM_CREATE, 0, 0);
+		
+
+		BkgndDC = CreateCompatibleDC(ezWnd->hdc);
+		BkBlurPic = GetMemDC(ezWnd->hdc, 1, 1);
+
+		EZSendMessage(ezWnd, EZWM_UPDATE_SETTINGS, 0, 0);
+		return 0;
+
+	case EZWM_UPDATE_SETTINGS:
+
+		BkgndPic = LoadPicFromFile(BkgndPicPath);
+		GetObject(BkgndPic, sizeof(BITMAP), &BkgndBmp);
+		DeleteObject(SelectObject(BkgndDC, BkgndPic));
 
 		return 0;
+
 	case EZWM_SIZE:
 		MoveEZWindow(LBorder, 0, 0, BorderWidth, ezWnd->Height, 0);
 		MoveEZWindow(PageHolder, LBORDER_NARROW, 0, ezWnd->Width - LBORDER_NARROW - 18, ezWnd->Height, 0);
@@ -239,7 +258,10 @@ EZWNDPROC MainWndProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 		MoveEZWindow(ScrollBar, ezWnd->Width - 18, 0, 18, ezWnd->Height, 0);
 
 		EZSendMessage(ScrollBar, EZWM_SETSCROLLPOS, 0, ezWnd->Height);
-
+		
+		//调整背景图
+		AdjustMemDC(BkBlurPic, ezWnd->hdc, ezWnd->Width, ezWnd->Height);
+		AdjustAndBlurBkPic(BkgndDC, BkgndBmp.bmWidth, BkgndBmp.bmHeight, BkBlurPic, ezWnd->Width, ezWnd->Height);
 		return 0;
 	case EZWM_SCROLLPOSCHANGE:
 		ScrollEZWindow(PageHolder, 0, -(int)wParam, 0);
@@ -322,10 +344,22 @@ EZWNDPROC MainWndProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 		HBRUSH OldBrush = SelectObject(wParam, CreateSolidBrush(BackgroundColor));
 		PatBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, PATCOPY);
 		DeleteObject(SelectObject(wParam, OldBrush));
+		BitBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, BkBlurPic, 0, 0, SRCCOPY);
+		//SelectObject(wParam, BkgndBitmap);
 	}
 		
 		break;
 	case EZWM_DESTROY:
+
+		DeleteDC(BkgndDC);
+
+		if (BkgndPic)
+			DeleteObject(BkgndPic);
+
+
+		DeleteMemDC(BkBlurPic);
+
+
 		PostQuitMessage(0);
 		break;
 
@@ -333,6 +367,23 @@ EZWNDPROC MainWndProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
+
+BOOL AdjustAndBlurBkPic(HDC hdcBk,int x1,int y1,HDC hdcBlur,int x2,int y2)
+{
+	SetStretchBltMode(hdcBlur, HALFTONE);
+	if (x1 * y2  < x2 * y1)	//if (x1 / y1 < x2 / y2)
+	{
+		//目标更长
+		StretchBlt(hdcBlur, 0, 0, x2, y2, hdcBk, 0,(y1 - (y2*x1)/x2)/2 , x1, (y2 * x1) / x2, SRCCOPY);
+	}
+	else
+	{
+		StretchBlt(hdcBlur, 0, 0, x2, y2, hdcBk, (x1 - (x2 * y1) / y2) / 2,0, (x2 * y1)/ y2, y1, SRCCOPY);
+		//StretchBlt(hdcBlur, 0, 0, x2, y2, hdcBk, 0, (y1 - (y2 * x1) / x2) / 2, x1, (y2 * x1) / x2, SRCCOPY);
+	}
+	//拉出来模糊处理
+	return 0;
+}
 
 
 EZWNDPROC NewScrollBarProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)

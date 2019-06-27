@@ -37,7 +37,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 
 	case EZWM_DRAW:
 	{
-		PatBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, BLACKNESS);
+		//PatBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, BLACKNESS);
 		SelectObject(wParam, ConsoleFont);
 		SetBkMode(wParam, TRANSPARENT);
 		SetTextColor(wParam, RGB(204, 204, 204));

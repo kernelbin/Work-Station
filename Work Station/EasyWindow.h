@@ -167,6 +167,10 @@
 #define EZWM_GETTEXT 801//获得文本,wParam缓冲区，lParam最大计数
 
 
+//完全自定义消息
+
+#define EZWM_USER 1000
+
 
 //内置消息
 #define SEZWM_COPYDC 2001//将存储DC复制到父窗口。

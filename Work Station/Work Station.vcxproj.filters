@@ -83,5 +83,8 @@
     <ClCompile Include="SettingsPage.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="Pic.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

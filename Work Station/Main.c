@@ -156,6 +156,11 @@ int MainProcessBooter()//处理妥善Pipe的问题，然后启动新进程
 int MainEntry(HINSTANCE hInstance,LPSTR lpCmdLine, int iCmdShow)
 {
 	//主程序入口
+
+	InitGdiPlus();
+
+
+
 	WNDCLASS wndclass;
 	//注册窗口类
 	wndclass.style = CS_HREDRAW | CS_VREDRAW;
@@ -211,7 +216,9 @@ int MainEntry(HINSTANCE hInstance,LPSTR lpCmdLine, int iCmdShow)
 	//创建一个线程来处理控制台
 	_beginthreadex(0, 0, ConsoleThread, 0, 0, 0);
 
-	return EZWndMessageLoop();
+	int iRet = EZWndMessageLoop();
+	CleanGdiPlus();
+	return iRet;
 }
 
 HANDLE StartStdoutReceiver(LPSTR lpCmdLine)
@@ -386,12 +393,7 @@ BOOL InitConsoleBuffer()
 
 void* WINAPI ConsoleThread()
 {
-	int a;
-	while (1)
-	{
-		printf("qwq");
-		Sleep(10);
-	}
+	printf("Microsoft Windows [版本 10.0.18362.175]\n(c)2019 Microsoft Corporation。保留所有权利。\n\nC:\\Users\\11603>");
 	return 0;
 }
 

@@ -15,3 +15,4 @@ int SaveSettings(BOOL bCreate);
 
 
 
+#define EZWM_UPDATE_SETTINGS (EZWM_USER + 1)

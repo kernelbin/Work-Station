@@ -54,6 +54,7 @@ int TryLoadSettings()
 BOOL LoadDefSettings()
 {
 	//使用默认设置
+	lstrcpy(BkgndPicPath, TEXT("C:\\Users\\11603\\Desktop\\1.jpg"));
 }
 
 int SaveSettings(BOOL bCreate)

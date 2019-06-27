@@ -66,3 +66,12 @@ pVTEXT ConsoleText, ConsoleInput;
 
 
 
+BOOL InitGdiPlus();
+BOOL CleanGdiPlus();
+
+HBITMAP LoadPicFromFile(TCHAR Path[]);
+
+
+
+//»´æ÷…Ë÷√
+TCHAR BkgndPicPath[MAX_PATH];
