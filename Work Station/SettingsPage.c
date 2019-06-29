@@ -1,16 +1,8 @@
 #include<Windows.h>
 #include"EasyWindow.h"
 #include"Global.h"
-/*设置页面分为板块：
-1. 界面设置
-2. 控制台设置
-3. 插件设置
-4.....
-
-*/
 
 #define SETTING_TYPE_PATH 1
-
 
 typedef struct __tagSettingItem
 {
@@ -22,6 +14,14 @@ typedef struct __tagSettingItem
 		TCHAR valStr[MAX_PATH];
 
 	}v;
+
+	union
+	{
+		int valInt;
+		TCHAR* valStr;
+
+	}link;//初始值
+
 	EZWND NameStatic;
 	EZWND ControlWnd[4];//控件，我觉得4个够了
 }SETTING_ITEM;
@@ -30,7 +30,8 @@ SETTING_ITEM UISettings[] = {
 	{
 		.ItemName = TEXT("背景图片"),
 		.ItemType = SETTING_TYPE_PATH,
-		.v.valStr = TEXT("")
+		.v.valStr = TEXT(""),
+		.link.valStr = BkgndPicPath
 	}
 };
 
@@ -61,6 +62,7 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 	switch (message)
 	{
 	case EZWM_CREATE:
+	{
 		SettingsTitle = CreateEZStyleWindow(ezWnd, TEXT("设置"), EZS_CHILD | EZS_STATIC, 0, 0, 0, 0);
 		FontForm.lfHeight = 55 * (5.0 / 7.0);
 		EZSendMessage(SettingsTitle, EZWM_SETFONT, 0, &FontForm);
@@ -90,8 +92,11 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 				{
 				case SETTING_TYPE_PATH:
 					//创建一个路径文本框（静态）和一个浏览按钮
+					//加载初始项
+					lstrcpy(SettingSection[iSection].SettingItem[iItem].v.valStr, SettingSection[iSection].SettingItem[iItem].link.valStr);
+
 					SettingSection[iSection].SettingItem[iItem].ControlWnd[0] =
-						CreateEZStyleWindow(ezWnd, TEXT("C:\\Users\\11603\\Desktop\\qwq\\111232312312\\1.jpg"), EZS_CHILD | EZS_STATIC, 0, 0, 0, 0);
+						CreateEZStyleWindow(ezWnd, SettingSection[iSection].SettingItem[iItem].v.valStr, EZS_CHILD | EZS_STATIC, 0, 0, 0, 0);
 					EZSendMessage(SettingSection[iSection].SettingItem[iItem].ControlWnd[0],
 						EZWM_SETFONT, 0, &FontForm);
 					EZSendMessage(SettingSection[iSection].SettingItem[iItem].ControlWnd[0],
@@ -108,16 +113,21 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 					EZSendMessage(SettingSection[iSection].SettingItem[iItem].ControlWnd[2],
 						EZWM_SETCOLOR, RGB(128, 128, 128), RGB(20, 20, 20));
 
-					
+					SettingSection[iSection].SettingItem[iItem].ControlWnd[2]->ezID = (iSection << 4) + iItem;
+					break;
+
 				}
 			}
 		}
 		return 0;
+	}
+		
 	case EZWM_USER_NOTIFY:
 
 		return 1000;
 	case EZWM_SIZE:
 		//布局元素
+	{
 		MoveEZWindow(SettingsTitle, PAGE_PADDING + 20, PAGE_PADDING, ezWnd->Width - 2 * PAGE_PADDING - 20, 55, 0);
 
 		//从这里开始元素布局
@@ -157,7 +167,7 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 						//下划线
 						MoveEZWindow(SettingSection[iSection].SettingItem[iItem].ControlWnd[1],
 							CountX + PAGE_PADDING, CountY + PAGE_PADDING + 34, min(PATHCONTROL_MAXLEN, ezWnd->Width - PAGE_PADDING * 2 - (CountX + PATHCONTROL_BTN_LEN + CONTROL_GAP * 2)), 2, 0);
-						
+
 						MoveEZWindow(SettingSection[iSection].SettingItem[iItem].ControlWnd[2],
 							CountX + PAGE_PADDING +
 							min(PATHCONTROL_MAXLEN, ezWnd->Width - PAGE_PADDING * 2 - (CountX + PATHCONTROL_BTN_LEN + CONTROL_GAP * 2)) + CONTROL_GAP, CountY + PAGE_PADDING, PATHCONTROL_BTN_LEN, 34, 0);
@@ -203,14 +213,40 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 					break;
 				}
 
-				CountY += 34;
+				CountY += 20;
 			}
 
 
 			//这里，留空
 			CountY += 50;
 		}
+	}
+		
+		break;
+	case EZWM_COMMAND:
+		//得到Section和Item
+	{
+		int iSection = (((EZWND)lParam)->ezID & 0b11110000) >> 4;
+		int iItem = (((EZWND)lParam)->ezID & 0b00001111);
 
+		switch (SettingSection[iSection].SettingItem[iItem].ItemType)
+		{
+		case SETTING_TYPE_PATH:
+		{
+			TCHAR Filter[] = TEXT("Text File (*.TXT)\0*.txt\0All Files(*.*)\0*.*\0\0");
+			TCHAR FilePathResult[MAX_PATH] = { 0 };
+			TCHAR FileTitleResult[MAX_PATH] = { 0 };
+
+			OpenFileDialog(NULL, Filter, BkgndPicPath, FileTitleResult);
+			MessageBox(NULL, BkgndPicPath, FileTitleResult, 0);
+
+			EZSendMessage(MainWnd, EZWM_UPDATE_SETTINGS, 0, 0);
+			break;
+		}
+			
+		}
+		//按类型分类
+	}
 		
 		break;
 	case EZWM_DRAW:
@@ -224,7 +260,7 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 }
 
 
-EZWNDPROC ColorBlockProc(EZWND ezWnd,int message,WPARAM wParam,LPARAM lParam)
+EZWNDPROC ColorBlockProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{

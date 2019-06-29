@@ -77,3 +77,6 @@ HBITMAP LoadPicFromFile(TCHAR Path[]);
 
 //»´æ÷…Ë÷√
 TCHAR BkgndPicPath[MAX_PATH];
+
+
+BOOL OpenFileDialog(HWND hOwner, TCHAR Filter[], TCHAR FileName[], TCHAR FileTitle[]);

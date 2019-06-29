@@ -150,7 +150,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 		
 
 
-		SetTextColor(wParam, RGB(1,147,233));
+		SetTextColor(wParam, RGB(255,255,255));
 
 		if (!ConsoleInput->Text)
 		{

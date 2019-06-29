@@ -287,7 +287,7 @@
 #define GET_EXTEND(ezWnd,Extend) (((pEZSE)(ezWnd))->Extend)
 
 //¿¹¾â³Ý
-#define STRETCH 4.0
+#define STRETCH 3.0
 
 #pragma endregion
 

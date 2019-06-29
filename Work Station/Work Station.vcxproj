@@ -157,6 +157,7 @@
     <ClCompile Include="cJSON.c" />
     <ClCompile Include="ConsolePage.c" />
     <ClCompile Include="EasyWindow.c" />
+    <ClCompile Include="FileDialog.c" />
     <ClCompile Include="GaussianBlur.c" />
     <ClCompile Include="GDIObjManager.c" />
     <ClCompile Include="LeftBorder.c" />

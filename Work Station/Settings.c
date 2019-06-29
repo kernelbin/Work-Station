@@ -88,3 +88,6 @@ int SaveSettings(BOOL bCreate)
 	CloseHandle(hFile);
 	return TRUE;
 }
+
+
+

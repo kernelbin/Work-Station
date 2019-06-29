@@ -2,7 +2,7 @@
 #include"EasyWindow.h"
 #include"Global.h"
 #include<math.h>
-
+#include"GaussianBlur.h"
 
 EZWND CreateMainParentWindow(int x, int y, int Width, int Height, int iCmdShow, EZWNDPROC ezWndProc)
 {
@@ -382,6 +382,31 @@ BOOL AdjustAndBlurBkPic(HDC hdcBk,int x1,int y1,HDC hdcBlur,int x2,int y2)
 		//StretchBlt(hdcBlur, 0, 0, x2, y2, hdcBk, 0, (y1 - (y2 * x1) / x2) / 2, x1, (y2 * x1) / x2, SRCCOPY);
 	}
 	//拉出来模糊处理
+	BITMAPINFOHEADER   bi;
+
+	bi.biSize = sizeof(BITMAPINFOHEADER);
+	bi.biWidth = x2;
+	bi.biHeight = y2;
+	bi.biPlanes = 1;
+	bi.biBitCount = 32;
+	bi.biCompression = BI_RGB;
+	bi.biSizeImage = 0;
+	bi.biXPelsPerMeter = 0;
+	bi.biYPelsPerMeter = 0;
+	bi.biClrUsed = 0;
+	bi.biClrImportant = 0;
+
+	HBITMAP hOrgdBitmap = SelectObject(hdcBlur, CreateCompatibleBitmap(hdcBlur, 1, 1));
+	PBYTE pByte = malloc(x2 * y2 * 4);
+	GetDIBits(hdcBlur, hOrgdBitmap, 0, y2 ,pByte, &bi, DIB_RGB_COLORS);
+	
+	GaussianBlurFilter(pByte, pByte, x2, y2, x2 * 4, 10);
+
+	SetDIBits(hdcBlur, hOrgdBitmap, 0, y2, pByte, &bi, DIB_RGB_COLORS);
+	free(pByte);
+	DeleteObject(SelectObject(hdcBlur, hOrgdBitmap));
+
+
 	return 0;
 }
 
