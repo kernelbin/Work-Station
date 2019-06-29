@@ -4,23 +4,51 @@
 
 #define SETTING_TYPE_PATH 1
 
+#define SETTING_NTF_EZMSG 1
 typedef struct __tagSettingItem
 {
 	TCHAR ItemName[32];//设置项名称
 	int ItemType;//设置类型
-	union
-	{
-		int valInt;
-		TCHAR valStr[MAX_PATH];
-
-	}v;
 
 	union
 	{
-		int valInt;
-		TCHAR* valStr;
+		struct
+		{
+			TCHAR *Path;
+			TCHAR* Name;
 
-	}link;//初始值
+			TCHAR* Filter;
+			//TCHAR Related;
+		}PathEdit;
+
+
+	}u;
+
+	//设置回调函数
+
+	int NotificationType;
+
+	union
+	{
+		struct
+		{
+			EZWND * pezWnd;
+			int message;
+		}ezmsg;
+	}n;
+	//union
+	//{
+	//	int valInt;
+	//	TCHAR valStr[MAX_PATH];
+
+	//}v;
+
+	//union
+	//{
+	//	int valInt;
+	//	TCHAR* valStr;
+
+	//}link;//初始值
 
 	EZWND NameStatic;
 	EZWND ControlWnd[4];//控件，我觉得4个够了
@@ -30,8 +58,12 @@ SETTING_ITEM UISettings[] = {
 	{
 		.ItemName = TEXT("背景图片"),
 		.ItemType = SETTING_TYPE_PATH,
-		.v.valStr = TEXT(""),
-		.link.valStr = BkgndPicPath
+		.u.PathEdit.Path = BkgndPicPath,
+		.u.PathEdit.Filter = TEXT("JPEG (*.jpg)\0*.jpg\0All Files(*.*)\0*.*\0\0"),
+
+		.NotificationType = SETTING_NTF_EZMSG,
+		.n.ezmsg.pezWnd = &MainWnd,
+		.n.ezmsg.message = EZWM_UPDATE_SETTINGS
 	}
 };
 
@@ -93,10 +125,10 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 				case SETTING_TYPE_PATH:
 					//创建一个路径文本框（静态）和一个浏览按钮
 					//加载初始项
-					lstrcpy(SettingSection[iSection].SettingItem[iItem].v.valStr, SettingSection[iSection].SettingItem[iItem].link.valStr);
+					//lstrcpy(SettingSection[iSection].SettingItem[iItem].v.valStr, SettingSection[iSection].SettingItem[iItem].link.valStr);
 
 					SettingSection[iSection].SettingItem[iItem].ControlWnd[0] =
-						CreateEZStyleWindow(ezWnd, SettingSection[iSection].SettingItem[iItem].v.valStr, EZS_CHILD | EZS_STATIC, 0, 0, 0, 0);
+						CreateEZStyleWindow(ezWnd, SettingSection[iSection].SettingItem[iItem].u.PathEdit.Path, EZS_CHILD | EZS_STATIC, 0, 0, 0, 0);
 					EZSendMessage(SettingSection[iSection].SettingItem[iItem].ControlWnd[0],
 						EZWM_SETFONT, 0, &FontForm);
 					EZSendMessage(SettingSection[iSection].SettingItem[iItem].ControlWnd[0],
@@ -229,23 +261,32 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 		int iSection = (((EZWND)lParam)->ezID & 0b11110000) >> 4;
 		int iItem = (((EZWND)lParam)->ezID & 0b00001111);
 
+		//按类型分类
 		switch (SettingSection[iSection].SettingItem[iItem].ItemType)
 		{
 		case SETTING_TYPE_PATH:
 		{
-			TCHAR Filter[] = TEXT("Text File (*.TXT)\0*.txt\0All Files(*.*)\0*.*\0\0");
-			TCHAR FilePathResult[MAX_PATH] = { 0 };
-			TCHAR FileTitleResult[MAX_PATH] = { 0 };
-
-			OpenFileDialog(NULL, Filter, BkgndPicPath, FileTitleResult);
-			MessageBox(NULL, BkgndPicPath, FileTitleResult, 0);
+			OpenFileDialog(NULL, SettingSection[iSection].SettingItem[iItem].u.PathEdit.Filter,
+				SettingSection[iSection].SettingItem[iItem].u.PathEdit.Path,
+				SettingSection[iSection].SettingItem[iItem].u.PathEdit.Name);
+			//MessageBox(NULL, BkgndPicPath, FileTitleResult, 0);
 
 			EZSendMessage(MainWnd, EZWM_UPDATE_SETTINGS, 0, 0);
+			
 			break;
 		}
 			
 		}
-		//按类型分类
+
+		//变更提醒回调函数
+		switch (SettingSection[iSection].SettingItem[iItem].NotificationType)
+		{
+		case SETTING_NTF_EZMSG:
+			EZSendMessage(*(SettingSection[iSection].SettingItem[iItem].n.ezmsg.pezWnd),
+				SettingSection[iSection].SettingItem[iItem].n.ezmsg.message, 0, 0);
+			break;
+		}
+		
 	}
 		
 		break;

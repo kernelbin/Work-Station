@@ -11,9 +11,9 @@ BOOL OpenFileDialog(HWND hOwner,TCHAR Filter[],TCHAR FileName[],TCHAR FileTitle[
 	ofn.lpstrCustomFilter = NULL;
 	ofn.nFilterIndex = 0;
 	ofn.lpstrFile = FileName;
-	ofn.nMaxFile = MAX_PATH;
+	ofn.nMaxFile = FileName ? MAX_PATH : 0;
 	ofn.lpstrFileTitle = FileTitle;
-	ofn.nMaxFileTitle = MAX_PATH;
+	ofn.nMaxFileTitle = FileTitle ? MAX_PATH : 0;
 	ofn.lpstrInitialDir = NULL;
 	ofn.lpstrTitle = NULL;
 	ofn.Flags = 0;

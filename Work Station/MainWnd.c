@@ -245,9 +245,15 @@ EZWNDPROC MainWndProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 	case EZWM_UPDATE_SETTINGS:
 
 		BkgndPic = LoadPicFromFile(BkgndPicPath);
-		GetObject(BkgndPic, sizeof(BITMAP), &BkgndBmp);
-		DeleteObject(SelectObject(BkgndDC, BkgndPic));
+		if (BkgndPic)
+		{
+			GetObject(BkgndPic, sizeof(BITMAP), &BkgndBmp);
+			DeleteObject(SelectObject(BkgndDC, BkgndPic));
 
+			AdjustMemDC(BkBlurPic, ezWnd->hdc, ezWnd->Width, ezWnd->Height);
+			AdjustAndBlurBkPic(BkgndDC, BkgndBmp.bmWidth, BkgndBmp.bmHeight, BkBlurPic, ezWnd->Width, ezWnd->Height);
+		}
+		EZRepaint(ezWnd, 0);
 		return 0;
 
 	case EZWM_SIZE:
@@ -260,8 +266,12 @@ EZWNDPROC MainWndProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 		EZSendMessage(ScrollBar, EZWM_SETSCROLLPOS, 0, ezWnd->Height);
 		
 		//µ÷Õû±³¾°Í¼
-		AdjustMemDC(BkBlurPic, ezWnd->hdc, ezWnd->Width, ezWnd->Height);
-		AdjustAndBlurBkPic(BkgndDC, BkgndBmp.bmWidth, BkgndBmp.bmHeight, BkBlurPic, ezWnd->Width, ezWnd->Height);
+		if (BkgndPic)
+		{
+			AdjustMemDC(BkBlurPic, ezWnd->hdc, ezWnd->Width, ezWnd->Height);
+			AdjustAndBlurBkPic(BkgndDC, BkgndBmp.bmWidth, BkgndBmp.bmHeight, BkBlurPic, ezWnd->Width, ezWnd->Height);
+		}
+		
 		return 0;
 	case EZWM_SCROLLPOSCHANGE:
 		ScrollEZWindow(PageHolder, 0, -(int)wParam, 0);
@@ -341,10 +351,16 @@ EZWNDPROC MainWndProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 		return 0;
 	case EZWM_DRAW:
 	{
-		HBRUSH OldBrush = SelectObject(wParam, CreateSolidBrush(BackgroundColor));
-		PatBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, PATCOPY);
-		DeleteObject(SelectObject(wParam, OldBrush));
-		BitBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, BkBlurPic, 0, 0, SRCCOPY);
+		if (BkgndPic)
+		{
+			BitBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, BkBlurPic, 0, 0, SRCCOPY);
+		}
+		else
+		{
+			HBRUSH OldBrush = SelectObject(wParam, CreateSolidBrush(BackgroundColor));
+			PatBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, PATCOPY);
+			DeleteObject(SelectObject(wParam, OldBrush));
+		}
 		//SelectObject(wParam, BkgndBitmap);
 	}
 		
@@ -403,6 +419,8 @@ BOOL AdjustAndBlurBkPic(HDC hdcBk,int x1,int y1,HDC hdcBlur,int x2,int y2)
 	GaussianBlurFilter(pByte, pByte, x2, y2, x2 * 4, 10);
 
 	SetDIBits(hdcBlur, hOrgdBitmap, 0, y2, pByte, &bi, DIB_RGB_COLORS);
+	
+	
 	free(pByte);
 	DeleteObject(SelectObject(hdcBlur, hOrgdBitmap));
 
