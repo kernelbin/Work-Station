@@ -26,9 +26,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 	case EZWM_CREATE:
 		ConsoleFont = CreateFont(16, 0, 0, 0, 0, 0, 0, 0, DEFAULT_CHARSET, 0, 0, 0, 0, TEXT("新宋体"));
 
-		
-		//SetVText(Text, TEXT("Workstation C Shell Console [版本 0.0.1]\n(c)2019 yh。保留所有权利。\n\nC:\\Users\\11603>\n\n"), -1);
-		//SetVText(InputText, TEXT("sudo apt-get install minecraft"), -1);
+		ezWnd->Transparent = 160;
 		return 0;
 
 	case EZWM_SIZE:
@@ -249,7 +247,9 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 	}
 	return 0;
 
-
+	case EZWM_TRANSDRAW:
+		PatBlt(wParam, 0, 0, ezWnd->Width, ezWnd->Height, BLACKNESS);
+		break;
 	case EZWM_CHAR:
 		//字符消息
 
@@ -388,7 +388,7 @@ EZWNDPROC ConsolePageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam
 		return 0;
 	case EZWM_USER_NOTIFY:
 		//TODO:正确计算文本高度+窗口高度，并返回
-		return 10000;
+		return 1000;
 
 	case EZWM_DESTROY:
 		DeleteObject(ConsoleFont);

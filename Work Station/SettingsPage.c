@@ -271,8 +271,10 @@ EZWNDPROC SettingsPageProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lPara
 				SettingSection[iSection].SettingItem[iItem].u.PathEdit.Name);
 			//MessageBox(NULL, BkgndPicPath, FileTitleResult, 0);
 
-			EZSendMessage(MainWnd, EZWM_UPDATE_SETTINGS, 0, 0);
-			
+			EZSendMessage(SettingSection[iSection].SettingItem[iItem].ControlWnd[0],
+				EZWM_SETTEXT,
+				SettingSection[iSection].SettingItem[iItem].u.PathEdit.Path,
+				0);
 			break;
 		}
 			

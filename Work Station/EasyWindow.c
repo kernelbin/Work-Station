@@ -2157,6 +2157,9 @@ BOOL BroadcastProc(EZWND ezWnd, int Param, WPARAM wP, LPARAM lP)
 
 		int X_PSX;
 		int Y_PSY;
+
+		RECT rectParent, rectPaint, rectIntersect;
+		
 		//判断是否是顶层窗口
 		if (ezWnd->bOpaque == FALSE)
 		{
@@ -2171,12 +2174,29 @@ BOOL BroadcastProc(EZWND ezWnd, int Param, WPARAM wP, LPARAM lP)
 				X_PSX = ezWnd->x + ezWnd->ezParent->ScrollX;
 				Y_PSY = ezWnd->y + ezWnd->ezParent->ScrollY;
 				//复制上级窗口的相应部分。
-				BitBlt(ezWnd->hdc, 0, 0,
-					max(ezWnd->Width, ezWnd->ezParent->Width), max(ezWnd->Height, ezWnd->ezParent->Height),
+
+
+				SetRect(&rectParent, 0, 0, ezWnd->ezParent->Width, ezWnd->ezParent->Height);
+				SetRect(&rectPaint, X_PSX, Y_PSY, X_PSX + ezWnd->Width, Y_PSY + ezWnd->Height);
+
+				IntersectRect(&rectIntersect, &rectPaint, &rectParent);
+
+				BitBlt(ezWnd->hdc,
+					rectIntersect.left - X_PSX,
+					rectIntersect.top - Y_PSY,
+					rectIntersect.right - rectIntersect.left,
+					rectIntersect.bottom - rectIntersect.top,
+					ezWnd->ezParent->hdc,
+					rectIntersect.left,
+					rectIntersect.top,
+					SRCCOPY);
+
+				/*BitBlt(ezWnd->hdc, 0, 0,
+					max(ezWnd->Width, ezWnd->ezParent->Width - ezWnd->x), max(ezWnd->Height, ezWnd->ezParent->Height - ezWnd->y),
 					ezWnd->ezParent->hdc,
 					X_PSX,
 					Y_PSY,
-					SRCCOPY);
+					SRCCOPY);*/
 			}
 		}
 
@@ -2194,14 +2214,31 @@ BOOL BroadcastProc(EZWND ezWnd, int Param, WPARAM wP, LPARAM lP)
 
 			if (!ezWnd->IsTopWindow)
 			{
+				//RECT rectParent, rectPaint, rectIntersect;
+				
+				//IntersectRect(&rectIntersect, &rectPaint, &rectParent);
+
+				AlphaBlend(ezWnd->hdc,
+					rectIntersect.left - X_PSX,
+					rectIntersect.top - Y_PSY,
+					rectIntersect.right - rectIntersect.left,
+					rectIntersect.bottom - rectIntersect.top,
+					ezWnd->ezParent->hdc,
+					rectIntersect.left,
+					rectIntersect.top,
+					rectIntersect.right - rectIntersect.left,
+					rectIntersect.bottom - rectIntersect.top,
+					bf);
 				//这个蠢货函数，不允许超出边界。我们只能手动确保没有超出边界。
-				int ab_Width, ab_Height;
+				/*int ab_Width, ab_Height;
 				ab_Width = min((ezWnd->Width), (ezWnd->ezParent->Width - (X_PSX)));
 				ab_Height = min((ezWnd->Height), (ezWnd->ezParent->Height - (Y_PSY)));
 
+
+				
 				AlphaBlend(ezWnd->hdc,
-					0,
-					0,
+					max(0, -X_PSX),
+					max(0, -Y_PSY),
 					ab_Width,
 					ab_Height,
 					ezWnd->ezParent->hdc,
@@ -2209,7 +2246,8 @@ BOOL BroadcastProc(EZWND ezWnd, int Param, WPARAM wP, LPARAM lP)
 					max(Y_PSY, 0),
 					ab_Width,
 					ab_Height,
-					bf);
+					bf);*/
+
 			}
 			else
 			{
