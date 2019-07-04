@@ -59,6 +59,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			return 0;
 		}
 		
+		
+
+		//在这里，创建控制台主线程用来等待编译的事件对象
+
+
+		hEventStartCompile = CreateEvent(0, FALSE, 0, 0);
+
+
 		int iRet = MainEntry(hInstance,lpCmdLine, iCmdShow);
 		bProgramRunning = FALSE;
 		CancelIoEx(hPipeOutR, 0);
@@ -238,6 +246,8 @@ HANDLE StartStdoutReceiver(LPSTR lpCmdLine)
 
 		setvbuf(stdout, 0, _IONBF, 0);
 
+		IsCommandRunning = FALSE;
+
 		StdoutRecvThread = _beginthreadex(0, 0, StdoutReceiver, 0, 0, 0);
 
 
@@ -389,24 +399,3 @@ BOOL InitConsoleBuffer()
 	return TRUE;
 }
 
-
-
-void* WINAPI ConsoleThread()
-{
-	printf("Microsoft Windows [版本 10.0.18362.175]\n(c)2019 Microsoft Corporation。保留所有权利。\n\nC:\\Users\\11603>");
-	return 0;
-}
-
-int checkprime(int a)
-{
-	int isprime = 1;
-	for (int i = 2; i < a; i++)
-	{
-		if (a % i == 0)
-		{
-			isprime = 0;
-			break;
-		}
-	}
-	return isprime;
-}

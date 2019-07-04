@@ -708,17 +708,50 @@ BOOL LocateCaretPos(HDC hdc, HFONT hFont, pVTEXT Text, pVTEXT InputText, int Wid
 
 BOOL CommandHandler(pVTEXT Command)
 {
+
+	
 	//转换为ASCII
 	int cbLen = WideCharToMultiByte(CP_ACP, 0, Command->Text, Command->Length, 0, 0, 0, 0);
-	char* buf = malloc((cbLen + 1) * sizeof(char));
-	WideCharToMultiByte(CP_ACP, 0, Command->Text, Command->Length, buf, cbLen, 0, 0);
-	buf[cbLen] = 0;
-	DWORD bWritten = 0;
-	WriteFile(hPipeInW, buf, cbLen, &bWritten, 0);
-	//TODO: 核验bWritten，看看是不是有没写进去的
+	
+	
+	
 
-	free(buf);
-	//MessageBox(0, Command->Text, TEXT("command"), 0);
-	return TRUE;
+	if (IsCommandRunning == FALSE)
+	{
+		CodeBuffer = malloc((cbLen + 1 + strlen("#include<stdio.h>\n#include<windows.h>\nint main(){}")) * sizeof(char));
+		
+
+		strncpy_s(CodeBuffer,
+			(cbLen + 1 + strlen("#include<stdio.h>\n#include<windows.h>\nint main(){}")) * sizeof(char), "#include<stdio.h>\n#include<windows.h>\nint main(){", strlen("#include<stdio.h>\n#include<windows.h>\nint main(){"));
+
+		WideCharToMultiByte(CP_ACP, 0, Command->Text, Command->Length, CodeBuffer + strlen("#include<stdio.h>\n#include<windows.h>\nint main(){"), cbLen, 0, 0);
+
+		CodeBuffer[cbLen + strlen("#include<stdio.h>\n#include<windows.h>\nint main(){}") - 1] = '}';
+		CodeBuffer[cbLen + strlen("#include<stdio.h>\n#include<windows.h>\nint main(){}")] = 0;
+
+		//激活事件对象，开始编译
+		IsCommandRunning = TRUE;
+
+		//CodeBuffer = CodeBuffer;//并不释放。编译线程编译好了由编译线程来释放这块内存
+		SetEvent(hEventStartCompile);
+
+	}
+	else
+	{
+		DWORD bWritten = 0;
+
+		char* buf = malloc((cbLen + 1) * sizeof(char));
+		WideCharToMultiByte(CP_ACP, 0, Command->Text, Command->Length, buf, cbLen, 0, 0);
+		buf[cbLen] = 0;
+		WriteFile(hPipeInW, buf, cbLen, &bWritten, 0);
+		//TODO: 核验bWritten，看看是不是有没写进去的
+
+		free(buf);
+		//MessageBox(0, Command->Text, TEXT("command"), 0);
+		return TRUE;
+	}
+
+
+	
 }
 

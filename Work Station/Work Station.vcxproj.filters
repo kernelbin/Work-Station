@@ -39,6 +39,9 @@
     <ClInclude Include="cJSON.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="libtcc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.c">
@@ -89,5 +92,16 @@
     <ClCompile Include="FileDialog.c">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="ConsoleMain.c">
+      <Filter>头文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="libtcc32.lib">
+      <Filter>源文件</Filter>
+    </Library>
+    <Library Include="libtcc64.lib">
+      <Filter>源文件</Filter>
+    </Library>
   </ItemGroup>
 </Project>

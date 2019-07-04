@@ -58,6 +58,13 @@ HANDLE hStdoutRecvThread;
 BOOL bProgramRunning;
 
 
+//开始编译事件对象
+HANDLE hEventStartCompile;
+BOOL IsCommandRunning;
+
+//执行代码缓冲区
+char *CodeBuffer;
+
 //控制台文本缓冲区
 pVTEXT ConsoleText, ConsoleInput;
 
