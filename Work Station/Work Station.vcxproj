@@ -89,6 +89,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,10 +173,6 @@
     <ClCompile Include="SettingsPage.c" />
     <ClCompile Include="ShadowWnd.c" />
     <ClCompile Include="VText.c" />
-  </ItemGroup>
-  <ItemGroup>
-    <Library Include="libtcc32.lib" />
-    <Library Include="libtcc64.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

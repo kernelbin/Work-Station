@@ -136,19 +136,22 @@ EZWNDPROC MainParentProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 
 	case EZWM_SIZE:
 
-		if (ezWnd->Extend->hExtend[0])
+		if (!IsIconic(ezWnd->hParent))
 		{
-			MoveEZWindow(ezWnd->Extend->hExtend[0], 0, APPBAR_HEIGHT, ezWnd->Width, ezWnd->Height - APPBAR_HEIGHT, 0);
-		}
+			if (ezWnd->Extend->hExtend[0])
+			{
+				MoveEZWindow(ezWnd->Extend->hExtend[0], 0, APPBAR_HEIGHT, ezWnd->Width, ezWnd->Height - APPBAR_HEIGHT, 0);
+			}
 
-		if ((ezWnd->EZStyle & MKDW(00000000, 00000000, 00000000, 11111111)) == EZS_OVERLAPPEDWINDOW)
-		{
-			int BtnLen = floor(EZWND_CAP_HEIGHT * 1.618);
+			if ((ezWnd->EZStyle & MKDW(00000000, 00000000, 00000000, 11111111)) == EZS_OVERLAPPEDWINDOW)
+			{
+				int BtnLen = floor(EZWND_CAP_HEIGHT * 1.618);
 
-			MoveEZWindow(ezWnd->Extend->hExtend[1], ezWnd->Width - BtnLen, 0, BtnLen, EZWND_CAP_HEIGHT, 0);
-			MoveEZWindow(ezWnd->Extend->hExtend[2], ezWnd->Width - (BtnLen << 1), 0, BtnLen, EZWND_CAP_HEIGHT, 0);
-			MoveEZWindow(ezWnd->Extend->hExtend[3], ezWnd->Width - BtnLen * 3, 0, BtnLen, EZWND_CAP_HEIGHT, 0);
+				MoveEZWindow(ezWnd->Extend->hExtend[1], ezWnd->Width - BtnLen, 0, BtnLen, EZWND_CAP_HEIGHT, 0);
+				MoveEZWindow(ezWnd->Extend->hExtend[2], ezWnd->Width - (BtnLen << 1), 0, BtnLen, EZWND_CAP_HEIGHT, 0);
+				MoveEZWindow(ezWnd->Extend->hExtend[3], ezWnd->Width - BtnLen * 3, 0, BtnLen, EZWND_CAP_HEIGHT, 0);
 
+			}
 		}
 		return 0;
 	case EZWM_GETMINMAXINFO:

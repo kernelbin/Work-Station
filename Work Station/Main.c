@@ -3,7 +3,13 @@
 #include"Global.h"
 #include<TChar.h>
 #include<process.h>
-//TYF Cloud 学生版 入口函数
+
+
+#ifdef _X86_
+#pragma comment(lib,"libtcc32.lib")
+#else
+#pragma comment(lib,"libtcc64.lib")
+#endif
 
 LRESULT CALLBACK ShadowWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -398,4 +404,4 @@ BOOL InitConsoleBuffer()
 
 	return TRUE;
 }
-
+					

@@ -96,12 +96,4 @@
       <Filter>头文件</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <Library Include="libtcc32.lib">
-      <Filter>源文件</Filter>
-    </Library>
-    <Library Include="libtcc64.lib">
-      <Filter>源文件</Filter>
-    </Library>
-  </ItemGroup>
 </Project>

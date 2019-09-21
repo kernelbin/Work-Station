@@ -43,8 +43,22 @@ void* WINAPI ConsoleThread()
 		//char my_program[] = "int myadd(int a, int b){return a+b;}";
 
 		TCCState* s = tcc_new();
-		tcc_set_lib_path(s, "C:/Users/11603/Desktop/TCC/tinycc");
-		tcc_add_library_path(s, "C:/Users/11603/Desktop/TCC/tinycc/lib");
+		tcc_set_lib_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc");
+
+		tcc_add_sysinclude_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\include");
+		tcc_add_sysinclude_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\include\\winapi");
+		tcc_add_sysinclude_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\include\\sys");
+
+		tcc_add_library_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\lib");
+		tcc_add_library_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\win32\\lib");
+
+		int a;
+
+		a = tcc_add_library(s, "user32");
+		a = tcc_add_library(s, "gdi32");
+		a = tcc_add_library(s, "kernel32");
+		//a = tcc_add_library(s, "msvcrt");
+
 		tcc_set_output_type(s, TCC_OUTPUT_MEMORY);
 
 
@@ -64,16 +78,18 @@ void* WINAPI ConsoleThread()
 		//system("pause");
 
 
+#pragma  warning( push ) 
+#pragma  warning( disable: 4996 )
 
-		tcc_add_symbol(s, "printf", printf);
-		//tcc_add_symbol(s, "ptf", printf);
+		//tcc_add_symbol(s, "printf", printf);
+		//tcc_add_symbol(s, "scanf", scanf);
 
+#pragma  warning(  pop  ) 
+
+		
 		
 
 		int size = tcc_relocate(s, NULL);
-
-		printf("relocate½áÊø");
-
 
 		if (size == -1)
 
@@ -97,6 +113,7 @@ void* WINAPI ConsoleThread()
 
 		CommandMain();
 
+		
 		tcc_delete(s);
 
 		free(mem);
