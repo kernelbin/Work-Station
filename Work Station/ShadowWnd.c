@@ -50,7 +50,7 @@ LRESULT CALLBACK ShadowWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lP
 		{HTTRANSPARENT	,HTCLIENT		,HTCLIENT		,HTCLIENT			,HTTRANSPARENT },
 		{HTTRANSPARENT	,HTTRANSPARENT	,HTTRANSPARENT	,HTTRANSPARENT		,HTTRANSPARENT }
 		};
-		
+
 		if (GET_X_LPARAM(lParam) < ParentRect.left - SHADOW_HITTEST)
 		{
 			CursorX = 0;
@@ -163,8 +163,8 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	break;
 	case WM_WINDOWPOSCHANGED:
 	{
-		
-	//	CallWindowProc(OldMainWndProc, hwnd, message, wParam, lParam);
+
+		//CallWindowProc(OldMainWndProc, hwnd, message, wParam, lParam);
 		if (IsIconic(hwnd) || IsZoomed(hwnd))
 		{
 			OldWindowCX = 0;
@@ -199,7 +199,7 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				OldWindowCX = WndPos->cx;
 				OldWindowCY = WndPos->cy;
 			}
-			
+
 
 		}
 
@@ -207,6 +207,9 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	}
 	case WM_SIZE:
 	{
+
+		CallWindowProc(OldMainWndProc, hwnd, message, wParam, MAKELPARAM(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) - 1));
+
 		if (IsIconic(hwnd) || IsZoomed(hwnd))
 		{
 			break;
@@ -216,11 +219,12 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 
 		RECT ParentRect;
 		GetWindowRect(MainWnd->hParent, &ParentRect);
+
 		int ArrX[8] = { ParentRect.left - SHADOW_MARIGN,ParentRect.left,ParentRect.right,ParentRect.left - SHADOW_MARIGN,ParentRect.right,ParentRect.left - SHADOW_MARIGN,ParentRect.left,ParentRect.right };
 		int ArrY[8] = { ParentRect.top - SHADOW_MARIGN,ParentRect.top - SHADOW_MARIGN,ParentRect.top - SHADOW_MARIGN,ParentRect.top,ParentRect.top,ParentRect.bottom,ParentRect.bottom,ParentRect.bottom };
-		
+
 		int ArrCX[8] = { SHADOW_MARIGN, GET_X_LPARAM(lParam),SHADOW_MARIGN,SHADOW_MARIGN,SHADOW_MARIGN,SHADOW_MARIGN, GET_X_LPARAM(lParam),SHADOW_MARIGN };
-		int ArrCY[8] = { SHADOW_MARIGN,SHADOW_MARIGN,SHADOW_MARIGN, GET_Y_LPARAM(lParam),GET_Y_LPARAM(lParam),SHADOW_MARIGN,SHADOW_MARIGN, SHADOW_MARIGN };
+		int ArrCY[8] = { SHADOW_MARIGN,SHADOW_MARIGN,SHADOW_MARIGN, GET_Y_LPARAM(lParam) - 1,GET_Y_LPARAM(lParam) - 1,SHADOW_MARIGN,SHADOW_MARIGN, SHADOW_MARIGN };
 		for (int i = 0; i < 8; i++)
 		{
 			PBYTE Data = malloc(ArrCX[i] * ArrCY[i] * 4);
@@ -350,7 +354,7 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		BLENDFUNCTION bf = { 0 };
 		bf.AlphaFormat = AC_SRC_ALPHA;
 		bf.SourceConstantAlpha = 255;
-		
+
 		for (int i = 0; i < 8; i++)
 		{
 			sz.cx = ArrCX[i];
@@ -366,10 +370,9 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 				SWP_SHOWWINDOW | SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE | SWP_NOREDRAW | SWP_NOREPOSITION | SWP_NOSENDCHANGING);
 			ReleaseDC(ShadowWnd[i], hdcShadowWnd);
 		}
-
-		break;
+		return 0;
 	}
-	
+
 	case WM_DESTROY:
 	{
 		HDC hdc = GetDC(hwnd);
@@ -395,19 +398,8 @@ LRESULT CALLBACK MainWndHookProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 	break;
 
 
-	case WM_STDIO_REDIRECT:
-	{
-		pVTEXT buf = InitVText();
-	//	MessageBoxW(0, wParam, L"qwq", 0);
-		SetVText(buf, wParam, lParam);
-		free(wParam);
-		CatVText(ConsoleText, buf);
-		FreeVText(buf);
 
-		if(MainWnd)EZRepaint(MainWnd, 0);
-		break;
-	}
-		
+
 	}
 	return CallWindowProc(OldMainWndProc, hwnd, message, wParam, lParam);
 }

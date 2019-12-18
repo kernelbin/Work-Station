@@ -193,15 +193,20 @@ EZWNDPROC MainParentProc(EZWND ezWnd, int message, WPARAM wParam, LPARAM lParam)
 
 				NCCSParam = (NCCALCSIZE_PARAMS*)lParam;
 				//RECT rect = { 0};
-				AdjustWindowRect(&(NCCSParam->rgrc[0]), GetWindowLong(ezWnd->hParent, GWL_STYLE), 0);
-				return 0;
+				//AdjustWindowRect(&(NCCSParam->rgrc[0]), GetWindowLong(ezWnd->hParent, GWL_STYLE), 0);
+				NCCSParam->rgrc[0].bottom++; //ÕâÀïÐÞ¸Ä
+				NCCSParam->rgrc[0].top;
+				NCCSParam->rgrc[0].left;
+				NCCSParam->rgrc[0].right;
+				//int iret = DefWindowProc(ezWnd->hParent, WM_NCCALCSIZE, wParam, lParam);
+
+				return 1;
 			}
 
 		}
 		//	InvalidateRect(hwnd, 0, 0);
 		return 1;
 	}
-
 	case EZWM_CLOSE:
 		return EZSendMessage(ezWnd->Extend->hExtend[0], EZWM_CLOSE, wParam, lParam);
 

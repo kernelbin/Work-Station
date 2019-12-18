@@ -45,6 +45,7 @@ void* WINAPI ConsoleThread()
 		TCCState* s = tcc_new();
 		tcc_set_lib_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc");
 
+		tcc_add_sysinclude_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\win32\\include");
 		tcc_add_sysinclude_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\include");
 		tcc_add_sysinclude_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\include\\winapi");
 		tcc_add_sysinclude_path(s, "C:\\Users\\11603\\Desktop\\TCC\\tinycc\\include\\sys");
@@ -57,7 +58,21 @@ void* WINAPI ConsoleThread()
 		a = tcc_add_library(s, "user32");
 		a = tcc_add_library(s, "gdi32");
 		a = tcc_add_library(s, "kernel32");
-		//a = tcc_add_library(s, "msvcrt");
+		a = tcc_add_library(s, "msvcrt");
+
+		/*这里！！！！！！！！！
+			setvbuf(stdout, 0, _IONBF, 0);
+		这行代码 需要在控制台程序里也执行！！！！！
+		
+		还有几个bug要修复，包括光标在输出后位置没有改变的bug
+			调用system函数会创建一个新的控制台窗口（然后又消失）的bug（拦截CreateProcess？）
+
+			然后把循环写好（现在这个东西只能执行一次指令）
+
+			考虑一下如何实现变量在上一个程序和下一个程序之间共享*/
+
+
+
 
 		tcc_set_output_type(s, TCC_OUTPUT_MEMORY);
 
@@ -83,7 +98,7 @@ void* WINAPI ConsoleThread()
 
 		//tcc_add_symbol(s, "printf", printf);
 		//tcc_add_symbol(s, "scanf", scanf);
-
+		
 #pragma  warning(  pop  ) 
 
 		
@@ -107,7 +122,6 @@ void* WINAPI ConsoleThread()
 		CommandMain = (int(*)())tcc_get_symbol(s, "main");
 
 		
-
 
 		if (!CommandMain) return 1;
 

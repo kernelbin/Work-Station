@@ -1838,6 +1838,12 @@ LRESULT CALLBACK EZParentWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM 
 		int iRet = EZSendMessage(ezWnd, EZWM_WINNCCALCSIZE, wParam, lParam);
 		if (iRet == 0)
 		{
+			NCCALCSIZE_PARAMS* NCCSParam;
+
+			NCCSParam = (NCCALCSIZE_PARAMS*)lParam;
+
+			/*int iret = DefWindowProc(hwnd, message, wParam, lParam);
+			return  iret;*/
 			break;
 		}
 		else
